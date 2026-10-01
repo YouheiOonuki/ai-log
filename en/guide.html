@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide and FAQ | AI Chat Log to Markdown | yorozu-craft</title>
+  <meta name="description" content="How to export your ChatGPT or Claude chats and turn them into Markdown for Obsidian: export steps, what the Markdown files contain, branches and attachments, FAQ.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/ai-log/en/guide.html">
+  <link rel="alternate" hreflang="ja" href="https://yorozu-craft.com/ai-log/guide.html">
+  <link rel="alternate" hreflang="en" href="https://yorozu-craft.com/ai-log/en/guide.html">
+  <link rel="alternate" hreflang="x-default" href="https://yorozu-craft.com/ai-log/guide.html">
+
+  <meta property="og:title" content="Guide and FAQ | AI Chat Log to Markdown">
+  <meta property="og:description" content="Export your ChatGPT or Claude chats and turn them into one Markdown file per chat.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yorozu-craft.com/ai-log/en/guide.html">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/ai-log/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- よくある質問（下の #faq と内容をそろえる） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I export ChatGPT conversations to Obsidian?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Choose your ChatGPT export zip on this page, download the Markdown zip, and unzip it into your Obsidian vault. Each chat becomes one file, with title, dates and model in the frontmatter (properties)." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I open conversations.json?",
+        "acceptedAnswer": { "@type": "Answer", "text": "conversations.json packs every chat into one long line of JSON, so it is hard to read as is. Choose it on this page to get one readable Markdown file per chat." }
+      },
+      {
+        "@type": "Question",
+        "name": "Are images and attachments included?",
+        "acceptedAnswer": { "@type": "Answer", "text": "No. The Markdown lists the file names only. The images and files themselves, and any text extracted from attachments in a Claude export, are left out." }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <p class="lang-switch no-print"><a href="../guide.html" hreflang="ja" lang="ja">日本語</a></p>
+
+  <header class="app-header">
+    <h1>AI Chat Log to Markdown: Guide</h1>
+    <p class="subtitle">How to export, what the Markdown contains, FAQ</p>
+    <p class="tm">Unofficial. Not affiliated with OpenAI or Anthropic.</p>
+  </header>
+
+  <main class="app-main">
+
+    <p class="card" style="text-align:center"><a href="./">▶ Open AI Chat Log to Markdown</a></p>
+
+    <article class="card content" id="howto">
+      <h2>How to use it</h2>
+      <p class="small">What this page covers: how to get your export, and what the Markdown files look like.</p>
+      <ol>
+        <li>Export your data from ChatGPT or Claude and download the zip.</li>
+        <li>Choose the zip with "Choose zip or json". You can choose both.</li>
+        <li>Check the count. Filter by title or date if you like.</li>
+        <li>Download the Markdown zip or one combined Markdown file.</li>
+      </ol>
+    </article>
+
+    <article class="card content" id="export">
+      <h2>How to export ChatGPT and Claude chats</h2>
+      <p>In ChatGPT, open Settings and go to Data controls. In Claude, open Settings and go to Privacy. Both send a download link by email that expires after 24 hours.</p>
+      <details>
+        <summary>More details</summary>
+        <ul>
+          <li>Claude exports work on the web app or Claude Desktop, not in the iOS or Android app (official help).</li>
+          <li>Inside the zip, only conversations.json is read (large ChatGPT exports may split it into conversations-000.json and so on). Images and users.json are not read.</li>
+        </ul>
+      </details>
+    </article>
+
+    <article class="card content" id="output">
+      <h2>What the Markdown files contain (for Obsidian)</h2>
+      <p>Each chat becomes one file named "date created title.md". The frontmatter holds the title, source, chat ID, created and updated times, model and message count.</p>
+      <ul>
+        <li>Messages are "## User (time)" headings or Obsidian callouts. Code blocks are kept as they are.</li>
+        <li>If you edited or regenerated a message, only the branch you last viewed is written.</li>
+        <li>Images and attachments are listed by name only. Characters that Windows or macOS do not allow in file names become _.</li>
+      </ul>
+      <p class="small">Based on official help pages and on samples and code from public converters (MIT). Last checked <time datetime="2026-10-01">October 1, 2026</time>.</p>
+      <details>
+        <summary>Sources</summary>
+        <ul id="sources"></ul>
+        <p class="small">OpenAI and Anthropic do not publish a specification for the export, so the format was checked against public converters. If your export does not load, let us know through the feedback form.</p>
+      </details>
+    </article>
+
+    <article class="card content" id="faq">
+      <h2>FAQ</h2>
+      <dl class="faq">
+        <dt>How do I export ChatGPT conversations to Obsidian?</dt>
+        <dd>Choose your ChatGPT export zip on this page, download the Markdown zip, and unzip it into your Obsidian vault. Each chat becomes one file, with title, dates and model in the frontmatter (properties).</dd>
+        <dt>How do I open conversations.json?</dt>
+        <dd>conversations.json packs every chat into one long line of JSON, so it is hard to read as is. Choose it on this page to get one readable Markdown file per chat.</dd>
+        <dt>Are images and attachments included?</dt>
+        <dd>No. The Markdown lists the file names only. The images and files themselves, and any text extracted from attachments in a Claude export, are left out.</dd>
+      </dl>
+    </article>
+
+    <article class="card content" id="notes">
+      <h2>Notes and your data</h2>
+      <ul>
+        <li><strong>Your files</strong>: The files you choose are read in this browser only and never uploaded. Nothing is saved, and everything is gone when you close the page. The page loads ad and analytics scripts, but they never receive your chats.</li>
+        <li><strong>The downloaded files</strong>: The Markdown contains your full chats. Check them before you share them.</li>
+        <li><strong>Format changes</strong>: The export format can change without notice. Anything that could not be read is listed under "List and notes" with the file name and line.</li>
+      </ul>
+      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=ai-log" target="_blank" rel="noopener">Feedback and bug reports (Google Form)</a>: we read every report but do not reply. Please do not paste your chats.</p>
+      <p>See <a href="../../en/about.html">About</a> and the <a href="../../en/privacy-policy.html">Privacy Policy</a> (shared by all tools on this site).</p>
+    </article>
+
+    <article class="card content" id="changelog">
+      <h2>Change log</h2>
+      <ul>
+        <li><time datetime="2026-10-01">2026-10-01</time> Published</li>
+      </ul>
+    </article>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="Footer">
+      <ul>
+        <li><a href="../../en/">yorozu-craft (English)</a></li>
+        <li><a href="./">AI Chat Log to Markdown</a></li>
+        <li><a href="./guide.html" aria-current="page">Guide and FAQ</a></li>
+        <li><a href="../../en/about.html">About</a></li>
+        <li><a href="../../en/privacy-policy.html">Privacy Policy</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <script src="../constants.js"></script>
+  <script>
+    // 出典の一覧は constants.js の en から（確認日と出典の先は日本語版と同じ値）
+    (function () {
+      var ul = document.getElementById('sources');
+      Object.keys(Constants.SOURCES).forEach(function (k) {
+        var s = Constants.SOURCES[k], e = s.en, li = document.createElement('li'), a = document.createElement('a');
+        li.appendChild(document.createTextNode(e.label + ': ' + e.value + ' ('));
+        a.href = e.url || s.url; a.textContent = e.source; a.rel = 'noopener'; li.appendChild(a);
+        li.appendChild(document.createTextNode(', checked ' + s.checked + ')'));
+        ul.appendChild(li);
+      });
+    })();
+  </script>
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

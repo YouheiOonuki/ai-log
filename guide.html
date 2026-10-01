@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>使い方・よくある質問｜AI 会話ログ Markdown 変換｜yorozu-craft</title>
-  <meta name="description" content="AI 会話ログ Markdown 変換の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <meta name="description" content="ChatGPT・Claude の会話を書き出して Markdown（Obsidian 用）にする手順。書き出し方、Markdown の中身、枝分かれ・添付の扱い、よくある質問。">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://yorozu-craft.com/ai-log/guide.html">
+  <link rel="alternate" hreflang="ja" href="https://yorozu-craft.com/ai-log/guide.html">
+  <link rel="alternate" hreflang="en" href="https://yorozu-craft.com/ai-log/en/guide.html">
+  <link rel="alternate" hreflang="x-default" href="https://yorozu-craft.com/ai-log/guide.html">
 
   <meta property="og:title" content="使い方・よくある質問｜AI 会話ログ Markdown 変換">
-  <meta property="og:description" content="AI 会話ログ Markdown 変換の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <meta property="og:description" content="ChatGPT・Claude の会話を書き出して、会話ごとの Markdown にする手順と中身の説明。">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://yorozu-craft.com/ai-log/guide.html">
   <meta property="og:site_name" content="yorozu-craft">
@@ -27,13 +30,18 @@
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "無料で使えますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "はい。会員登録やインストールも不要で、ブラウザだけで使えます。" }
+        "name": "ChatGPT の会話を Obsidian に入れるには？",
+        "acceptedAnswer": { "@type": "Answer", "text": "ChatGPT の書き出しの zip をこのページで選び、Markdown（zip）をダウンロードして、展開したフォルダを Obsidian の保管庫に入れます。会話ごとに 1 ファイルで、題名・日時・モデルは frontmatter（プロパティ）に入ります。" }
       },
       {
         "@type": "Question",
-        "name": "入力した内容はどこに保存されますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。" }
+        "name": "conversations.json の開き方がわからない",
+        "acceptedAnswer": { "@type": "Answer", "text": "conversations.json は全部の会話が 1 行に詰まった JSON で、そのままでは読みにくいファイルです。このページで選ぶと、会話ごとの読める Markdown になります。" }
+      },
+      {
+        "@type": "Question",
+        "name": "画像や添付ファイルも保存されますか？",
+        "acceptedAnswer": { "@type": "Answer", "text": "Markdown にはファイルの名前だけを書き、画像や添付の中身は入れません。Claude の書き出しにある添付の抜き出し文も入れません。" }
       }
     ]
   }
@@ -50,9 +58,12 @@
 </head>
 <body>
 
+  <p class="lang-switch no-print"><a href="./en/guide.html" hreflang="en" lang="en">English</a></p>
+
   <header class="app-header">
     <h1>AI 会話ログ Markdown 変換 の使い方</h1>
-    <p class="subtitle">使い方・計算の根拠・よくある質問・ご利用上の注意</p>
+    <p class="subtitle">書き出し方・Markdown の中身・よくある質問</p>
+    <p class="tm">非公式。OpenAI・Anthropic とは関係ありません。</p>
   </header>
 
   <main class="app-main">
@@ -62,42 +73,61 @@
     <article class="card content" id="howto">
       <h2>使い方</h2>
       <ol>
-        <li>（手順を書く）</li>
+        <li>ChatGPT か Claude でデータを書き出し、zip をダウンロードする</li>
+        <li>「zip か json を選ぶ」で zip を選ぶ（両方まとめて選べる）</li>
+        <li>件数を見て、要るなら題名・期間で絞り込む</li>
+        <li>Markdown（zip）か、1 つにまとめた Markdown をダウンロードする</li>
       </ol>
     </article>
 
-    <!-- 制度・単価など時点のある値を使うツールだけ残す。値は constants.js、画面にも時点を出す -->
-    <article class="card content" id="basis">
-      <h2>根拠と確認日</h2>
-      <dl class="info-list">
-        <dt>根拠</dt>
-        <dd>（法令・公式ページの名前）</dd>
-        <dt>最終確認日</dt>
-        <dd><time datetime="2026-10-01">2026年10月1日</time></dd>
-      </dl>
-      <p class="small">制度や単価は変わることがあります。最終確認日から時間がたっている場合は、公式ページで最新の情報をご確認ください。</p>
+    <article class="card content" id="export">
+      <h2>ChatGPT・Claude の会話をエクスポートする方法</h2>
+      <p>ChatGPT は設定の「データコントロール」から、Claude は設定の「プライバシー」から書き出します。どちらもリンクがメールで届き、24 時間で切れます。</p>
+      <details>
+        <summary>もう少しくわしく</summary>
+        <ul>
+          <li>Claude の書き出しは Web 版かデスクトップ版から。iOS・Android のアプリからはできません（公式ヘルプ）。</li>
+          <li>zip の中で読むのは conversations.json（ChatGPT は分かれて conversations-000.json などになることがある）だけです。画像や users.json は読みません。</li>
+        </ul>
+      </details>
+    </article>
+
+    <article class="card content" id="output">
+      <h2>Markdown の中身（Obsidian で使う形）</h2>
+      <p>会話 1 つが 1 ファイルで、ファイル名は「作った日 題名.md」です。題名・出どころ・会話 ID・作成と更新の日時・モデル・発言の数を frontmatter に書きます。</p>
+      <ul>
+        <li>発言は「## ユーザー（日時）」の見出しか、Obsidian のコールアウトで書きます。コードブロックはそのまま残します。</li>
+        <li>編集・再生成で枝が分かれた会話は、最後に見ていた枝だけを書きます。</li>
+        <li>画像・添付は名前だけ書きます。Windows・macOS で使えない文字はファイル名で _ に替えます。</li>
+      </ul>
+      <p class="small">形式の根拠: 公式ヘルプと、公開の変換器（MIT）の試料とコード。最終確認日 <time datetime="2026-10-01">2026年10月1日</time>。</p>
+      <details>
+        <summary>確かめた先（出典）</summary>
+        <ul id="sources"></ul>
+        <p class="small">OpenAI・Anthropic は書き出しの中身の仕様を公開していないため、形式は公開の変換器で確かめました。形が変わって読めないときは、ご要望フォームで教えてください。</p>
+      </details>
     </article>
 
     <article class="card content" id="faq">
       <h2>よくある質問</h2>
       <dl class="faq">
-        <dt>無料で使えますか？</dt>
-        <dd>はい。会員登録やインストールも不要で、ブラウザだけで使えます。</dd>
-        <dt>入力した内容はどこに保存されますか？</dt>
-        <dd>お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。</dd>
+        <dt>ChatGPT の会話を Obsidian に入れるには？</dt>
+        <dd>ChatGPT の書き出しの zip をこのページで選び、Markdown（zip）をダウンロードして、展開したフォルダを Obsidian の保管庫に入れます。会話ごとに 1 ファイルで、題名・日時・モデルは frontmatter（プロパティ）に入ります。</dd>
+        <dt>conversations.json の開き方がわからない</dt>
+        <dd>conversations.json は全部の会話が 1 行に詰まった JSON で、そのままでは読みにくいファイルです。このページで選ぶと、会話ごとの読める Markdown になります。</dd>
+        <dt>画像や添付ファイルも保存されますか？</dt>
+        <dd>Markdown にはファイルの名前だけを書き、画像や添付の中身は入れません。Claude の書き出しにある添付の抜き出し文も入れません。</dd>
       </dl>
     </article>
 
-    <!-- README「ツールを追加するとき」8: ツール固有の注意・データの扱いはここに書く -->
     <article class="card content" id="notes">
       <h2>ご利用上の注意・データの扱い</h2>
       <ul>
-        <li><strong>保存されるデータ</strong>：（何をブラウザに保存するか。保存しないならそう書く）</li>
-        <li><strong>バックアップ</strong>：「ファイルに書き出す」で、（保存している内容）を JSON ファイルにできます。ファイルはこの端末の中で作り、どこにも送信しません。機種変更のときやブラウザのデータを消す前に書き出しておき、新しい端末ではファイルを移して「ファイルから読み込む」を押してください（今の内容はファイルの内容に置き換わります）。（ブラウザに保存しないツールではこの行を消す）</li>
-        <li><strong>共有リンク</strong>：（共有機能があれば、リンクに何が含まれるか。URL の「#」以降に入るのでサーバーには送信されない）</li>
-        <li><strong>結果の扱い</strong>：（計算結果は目安であること、最終的な確認先など）</li>
+        <li><strong>ファイル</strong>：選んだファイルはこのブラウザの中で読むだけで、外部に送信しません。ファイルも設定もブラウザに保存せず、ページを閉じると消えます。ページには広告とアクセス解析のスクリプトがありますが、会話の中身は渡しません。</li>
+        <li><strong>書き出したファイル</strong>：Markdown には会話の全文が入ります。共有する前に中身を確かめてください。</li>
+        <li><strong>結果の扱い</strong>：書き出しの形は予告なく変わることがあります。読めなかった所は画面の「一覧と注意」にファイル名と行で出します。</li>
       </ul>
-      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=ai-log" target="_blank" rel="noopener">ご要望・不具合の報告（Google フォーム）</a>：いただいた内容をもとに直します。お返事はしていません。</p>
+      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=ai-log" target="_blank" rel="noopener">ご要望・不具合の報告（Google フォーム）</a>：いただいた内容をもとに直します。お返事はしていません。会話の中身は書かないでください。</p>
       <p>サイト全体の運営者情報・免責事項は<a href="../about.html">こちら</a>、プライバシーポリシーは<a href="../privacy-policy.html">こちら</a>です（すべてのツールで共通）。</p>
     </article>
 
@@ -123,6 +153,20 @@
     <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
   </footer>
 
+  <script src="./constants.js"></script>
+  <script>
+    // 出典の一覧は constants.js から（値を 2 か所に持たない）
+    (function () {
+      var ul = document.getElementById('sources');
+      Object.keys(Constants.SOURCES).forEach(function (k) {
+        var s = Constants.SOURCES[k], li = document.createElement('li'), a = document.createElement('a');
+        li.appendChild(document.createTextNode(s.label + ': ' + s.value + '（'));
+        a.href = s.url; a.textContent = s.source; a.rel = 'noopener'; li.appendChild(a);
+        li.appendChild(document.createTextNode('、確認 ' + s.checked + '）'));
+        ul.appendChild(li);
+      });
+    })();
+  </script>
   <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

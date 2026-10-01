@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export ChatGPT and Claude Chats to Markdown (for Obsidian) | yorozu-craft</title>
+  <meta name="description" content="Convert your ChatGPT or Claude data export (zip or conversations.json) into one Markdown file per chat, with YAML frontmatter, ready for Obsidian. Runs in your browser; nothing is uploaded.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/ai-log/en/">
+  <link rel="alternate" hreflang="ja" href="https://yorozu-craft.com/ai-log/">
+  <link rel="alternate" hreflang="en" href="https://yorozu-craft.com/ai-log/en/">
+  <link rel="alternate" hreflang="x-default" href="https://yorozu-craft.com/ai-log/">
+
+  <meta property="og:title" content="Export ChatGPT and Claude Chats to Markdown | yorozu-craft">
+  <meta property="og:description" content="One Markdown file per chat, with frontmatter, from your ChatGPT or Claude export. For Obsidian. Nothing is uploaded.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yorozu-craft.com/ai-log/en/">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/ai-log/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#8b4513" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1c1814" media="(prefers-color-scheme: dark)">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "AI Chat Log to Markdown",
+    "description": "Convert your ChatGPT or Claude data export into one Markdown file per chat, with frontmatter. Runs in your browser; nothing is uploaded.",
+    "url": "https://yorozu-craft.com/ai-log/en/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+    "inLanguage": "en"
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <p class="lang-switch no-print"><a href="../" hreflang="ja" lang="ja">日本語</a></p>
+
+  <header class="app-header">
+    <h1>AI Chat Log to Markdown</h1>
+    <p class="subtitle">One Markdown file per chat. Your files never leave this browser.</p>
+    <!-- 商標（REVIEW C7 R9） -->
+    <p class="tm">Unofficial. Not affiliated with OpenAI or Anthropic.</p>
+  </header>
+
+  <!-- 日本語版（../index.html）と同じ骨組み・同じ id。文は text.js の en。ファイルも設定も保存しない -->
+  <main class="app-main">
+
+    <fieldset class="card req" id="drop">
+      <legend>Your export</legend>
+      <div class="dropzone" id="dropzone">
+        <div class="btn-row">
+          <button type="button" class="btn" id="pick">Choose zip or json</button>
+        </div>
+        <p class="hint">The ChatGPT or Claude export .zip (or the conversations.json inside). You can choose both.</p>
+        <p class="small"><button type="button" class="linkbtn" id="try-sample">Try it with sample chats (fictional)</button></p>
+      </div>
+      <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
+    </fieldset>
+
+    <section class="card result-card" id="result-card" tabindex="-1" aria-labelledby="h-result">
+      <h2 id="h-result">Result</h2>
+      <div id="result-main" aria-live="polite">
+        <p class="result-big" id="result">—</p>
+        <p class="result-sub" id="result-sub">Choose a file to see how many chats it has.</p>
+      </div>
+      <div class="btn-row no-print" id="dl-row" hidden>
+        <button type="button" class="btn" id="dl-zip">Download Markdown (zip)</button>
+        <button type="button" class="btn btn-sub" id="dl-one">One combined Markdown file</button>
+      </div>
+      <details class="rels" id="detail" hidden>
+        <summary>List and notes (tap a title to preview)</summary>
+        <ul class="notes" id="notes"></ul>
+        <ul class="conv-list" id="list"></ul>
+        <p class="small" id="preview-path"></p>
+        <pre class="md-preview" id="preview" tabindex="0" hidden></pre>
+      </details>
+    </section>
+
+    <div class="opts">
+      <details class="card opt" id="opt-filter">
+        <summary>Filter: <span class="opt-state">All</span></summary>
+        <div class="field">
+          <label for="q">Words in the title</label>
+          <input type="search" id="q" placeholder="e.g. travel">
+        </div>
+        <div class="field">
+          <label for="from">Date created (leave empty for all)</label>
+          <div class="range"><input type="date" id="from" aria-label="From"> to <input type="date" id="to" aria-label="To"></div>
+        </div>
+        <div class="field">
+          <label for="source">Source</label>
+          <select id="source">
+            <option value="all" selected>All</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option>
+          </select>
+        </div>
+      </details>
+      <details class="card opt" id="opt-out">
+        <summary>Format: <span class="opt-state">Headings, no folders</span></summary>
+        <div class="field">
+          <label for="style">Messages as</label>
+          <select id="style">
+            <option value="heading" selected>Headings (## User)</option>
+            <option value="callout">Callouts (Obsidian &gt; [!note])</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="folder">Folders</label>
+          <select id="folder">
+            <option value="none" selected>None</option>
+            <option value="year">By year (2025/)</option>
+            <option value="month">By year and month (2025/2025-01/)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="by-source"> Separate folders for ChatGPT and Claude</label>
+        </div>
+      </details>
+    </div>
+
+    <p class="small">Nothing is saved. Your files are read on this device only and are gone when you close the page.</p>
+    <p class="small"><a href="./guide.html">How to export, what is included, FAQ</a></p>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="Footer">
+      <ul>
+        <li><a href="../../en/">yorozu-craft (English)</a></li>
+        <li><a href="./" aria-current="page">AI Chat Log to Markdown</a></li>
+        <li><a href="./guide.html">Guide and FAQ</a></li>
+        <li><a href="../../en/about.html">About</a></li>
+        <li><a href="../../en/privacy-policy.html">Privacy Policy</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <script src="../text.js"></script>
+  <script src="../screen.js"></script>
+  <script src="../zip.js"></script>
+  <script src="../calc.js"></script>
+  <script src="../engine.js"></script>
+  <script src="../main.js"></script>
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
