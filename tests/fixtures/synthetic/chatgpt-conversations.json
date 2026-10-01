@@ -1,0 +1,533 @@
+[
+ {
+  "title": "Branch test: edit and regenerate",
+  "create_time": 1767225600,
+  "update_time": 1767226200,
+  "conversation_id": "gpt-branch-0001",
+  "id": "gpt-branch-0001",
+  "current_node": "a3",
+  "default_model_slug": "model-default",
+  "mapping": {
+   "root": {
+    "id": "root",
+    "parent": null,
+    "children": [
+     "sys"
+    ],
+    "message": null
+   },
+   "sys": {
+    "id": "sys",
+    "parent": "root",
+    "children": [
+     "u1"
+    ],
+    "message": {
+     "id": "sys",
+     "author": {
+      "role": "system",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225600,
+     "update_time": 1767225600,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "hidden system prompt"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "u1": {
+    "id": "u1",
+    "parent": "sys",
+    "children": [
+     "a1old",
+     "a1"
+    ],
+    "message": {
+     "id": "u1",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225610,
+     "update_time": 1767225610,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "First question"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "a1old": {
+    "id": "a1old",
+    "parent": "u1",
+    "children": [],
+    "message": {
+     "id": "a1old",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225620,
+     "update_time": 1767225620,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "OLD ANSWER (regenerated away)"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {
+      "model_slug": "model-a"
+     },
+     "recipient": "all"
+    }
+   },
+   "a1": {
+    "id": "a1",
+    "parent": "u1",
+    "children": [
+     "u2old",
+     "u2"
+    ],
+    "message": {
+     "id": "a1",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225630,
+     "update_time": 1767225630,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "Answer one"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {
+      "model_slug": "model-a"
+     },
+     "recipient": "all"
+    }
+   },
+   "u2old": {
+    "id": "u2old",
+    "parent": "a1",
+    "children": [
+     "a2old"
+    ],
+    "message": {
+     "id": "u2old",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225640,
+     "update_time": 1767225640,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "OLD EDIT of question two"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "a2old": {
+    "id": "a2old",
+    "parent": "u2old",
+    "children": [],
+    "message": {
+     "id": "a2old",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225650,
+     "update_time": 1767225650,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "OLD reply to old edit"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "u2": {
+    "id": "u2",
+    "parent": "a1",
+    "children": [
+     "th"
+    ],
+    "message": {
+     "id": "u2",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225660,
+     "update_time": 1767225660,
+     "content": {
+      "content_type": "multimodal_text",
+      "parts": [
+       {
+        "content_type": "image_asset_pointer",
+        "asset_pointer": "sediment://file_00000000abc",
+        "size_bytes": 1,
+        "width": 1,
+        "height": 1
+       },
+       "What is in this picture?"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {
+      "attachments": [
+       {
+        "id": "file-xyz",
+        "name": "report.pdf",
+        "mime_type": "application/pdf"
+       }
+      ]
+     },
+     "recipient": "all"
+    }
+   },
+   "th": {
+    "id": "th",
+    "parent": "u2",
+    "children": [
+     "code"
+    ],
+    "message": {
+     "id": "th",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225665,
+     "update_time": 1767225665,
+     "content": {
+      "content_type": "thoughts",
+      "thoughts": [
+       {
+        "summary": "thinking",
+        "content": "HIDDEN THOUGHT"
+       }
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "code": {
+    "id": "code",
+    "parent": "th",
+    "children": [
+     "out"
+    ],
+    "message": {
+     "id": "code",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225670,
+     "update_time": 1767225670,
+     "content": {
+      "content_type": "code",
+      "language": "python",
+      "text": "print(\"hi\")\n```inner```"
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "python"
+    }
+   },
+   "out": {
+    "id": "out",
+    "parent": "code",
+    "children": [
+     "hid"
+    ],
+    "message": {
+     "id": "out",
+     "author": {
+      "role": "tool",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225680,
+     "update_time": 1767225680,
+     "content": {
+      "content_type": "execution_output",
+      "text": "hi"
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "hid": {
+    "id": "hid",
+    "parent": "out",
+    "children": [
+     "a3"
+    ],
+    "message": {
+     "id": "hid",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225685,
+     "update_time": 1767225685,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "HIDDEN visually"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {
+      "is_visually_hidden_from_conversation": true
+     },
+     "recipient": "all"
+    }
+   },
+   "a3": {
+    "id": "a3",
+    "parent": "hid",
+    "children": [],
+    "message": {
+     "id": "a3",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225690,
+     "update_time": 1767225690,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "Final answer with code:\n\n```js\nconsole.log(1)\n```"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {
+      "model_slug": "model-b"
+     },
+     "recipient": "all"
+    }
+   }
+  }
+ },
+ {
+  "title": null,
+  "create_time": null,
+  "update_time": null,
+  "conversation_id": "gpt-untitled-0002",
+  "current_node": "b2",
+  "mapping": {
+   "b0": {
+    "id": "b0",
+    "parent": null,
+    "children": [
+     "b1"
+    ],
+    "message": null
+   },
+   "b1": {
+    "id": "b1",
+    "parent": "b0",
+    "children": [
+     "b2"
+    ],
+    "message": {
+     "id": "b1",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": null,
+     "update_time": 1767225600,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "No title here"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   },
+   "b2": {
+    "id": "b2",
+    "parent": "b1",
+    "children": [],
+    "message": {
+     "id": "b2",
+     "author": {
+      "role": "assistant",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": null,
+     "update_time": 1767225600,
+     "content": {
+      "content_type": "future_type_x",
+      "parts": [
+       "Text in an unknown type"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   }
+  }
+ },
+ {
+  "title": "CON: a/b\\c *?\"<>|#^[x]. ",
+  "create_time": 1767225700,
+  "update_time": 1767225700,
+  "conversation_id": "gpt-name-0003",
+  "current_node": "c1",
+  "mapping": {
+   "c0": {
+    "id": "c0",
+    "parent": null,
+    "children": [
+     "c1"
+    ],
+    "message": null
+   },
+   "c1": {
+    "id": "c1",
+    "parent": "c0",
+    "children": [],
+    "message": {
+     "id": "c1",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225700,
+     "update_time": 1767225700,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "reserved name test"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   }
+  }
+ },
+ {
+  "title": "CON: a/b\\c *?\"<>|#^[x]. ",
+  "create_time": 1767225800,
+  "update_time": 1767225800,
+  "conversation_id": "gpt-name-0004",
+  "current_node": "c1",
+  "mapping": {
+   "c0": {
+    "id": "c0",
+    "parent": null,
+    "children": [
+     "c1"
+    ],
+    "message": null
+   },
+   "c1": {
+    "id": "c1",
+    "parent": "c0",
+    "children": [],
+    "message": {
+     "id": "c1",
+     "author": {
+      "role": "user",
+      "name": null,
+      "metadata": {}
+     },
+     "create_time": 1767225800,
+     "update_time": 1767225800,
+     "content": {
+      "content_type": "text",
+      "parts": [
+       "reserved name test"
+      ]
+     },
+     "status": "finished_successfully",
+     "end_turn": true,
+     "weight": 1,
+     "metadata": {},
+     "recipient": "all"
+    }
+   }
+  }
+ }
+]

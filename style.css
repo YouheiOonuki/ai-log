@@ -1,5 +1,5 @@
 /* ===========================
-   __TITLE__ — yorozu-craft 共通の和紙風の配色
+   AI 会話ログ Markdown 変換 — yorozu-craft 共通の和紙風の配色
    色はトークン（--bg / --card / --text / --muted / --accent / --border）だけを使う。
    ダークモードは端末の設定に自動で合わせる（prefers-color-scheme。手動切替は付けない）
    =========================== */
@@ -52,6 +52,10 @@ a { color: var(--accent); }
 }
 .app-header h1 { font-size: 1.45rem; color: var(--accent); line-height: 1.4; }
 .app-header .subtitle { font-size: 0.88rem; color: var(--muted); margin-top: 0.3rem; }
+.app-header .tm { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* 日英の切り替え（README「ツールを追加するとき」23） */
+.lang-switch { text-align: right; font-size: 0.85rem; padding: 0.4rem max(1rem, calc((100% - 680px) / 2 + 1rem)) 0; background: var(--bg-2); }
 
 /* レイアウト */
 .app-main { max-width: 680px; margin: 0 auto; padding: 1rem; }
@@ -201,3 +205,25 @@ details > summary:focus-visible { outline: 2px solid var(--accent); outline-offs
   /* 広告は印刷に出さない（gakushu-print と同じ） */
   ins.adsbygoogle, .google-auto-placed, iframe[id^="aswift"], iframe[id^="google_ads"] { display: none !important; }
 }
+
+/* ===========================
+   このツールの部品（ファイルの選択・一覧・Markdown の見本）
+   =========================== */
+.btn-sub { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.linkbtn { background: none; border: none; padding: 0.5rem 0; min-height: 44px; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; text-align: left; }
+.dropzone { border: 2px dashed var(--border); border-radius: 8px; padding: 0.6rem 0.9rem; }
+#drop.dragging .dropzone { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone .hint { font-size: 0.82rem; color: var(--muted); }
+.field label.check { display: flex; gap: 0.5rem; align-items: center; font-weight: normal; min-height: 44px; }
+.field label.check input { width: 1.2rem; height: 1.2rem; }
+.field input[type="search"] { width: 100%; max-width: 20rem; padding: 0.5rem; font-size: 1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
+.range { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.range input { padding: 0.4rem; font-size: 1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--text); }
+.notes { font-size: 0.85rem; padding-left: 1.2rem; margin: 0.4rem 0 0.8rem; overflow-wrap: anywhere; }
+.notes li + li { margin-top: 0.3rem; }
+.notes ul { padding-left: 1.2rem; margin-top: 0.2rem; }
+.conv-list { list-style: none; margin: 0.4rem 0; border-top: 1px solid var(--border); }
+.conv-list li { border-bottom: 1px solid var(--border); padding: 0.1rem 0; }
+.conv-list .conv { display: block; width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.4rem 0 0.1rem; }
+.conv-list .conv-meta { display: block; font-size: 0.78rem; color: var(--muted); padding-bottom: 0.3rem; }
+.md-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.5; max-height: 24rem; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; }
