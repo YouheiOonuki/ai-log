@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { backupFileName, buildBackup, parseBackup } = require('../calc.js');
 
-const TOOL = '__REPO__';
+const TOOL = 'ai-log';
 const DATA = { draft: { amount: '1234' } };
 const REQUIRED = ['draft'];
 

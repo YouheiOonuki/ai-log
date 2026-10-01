@@ -1,13 +1,13 @@
 // ===========================
-// __TITLE__ — 画面の制御
+// AI 会話ログ Markdown 変換 — 画面の制御
 // 計算は calc.js（純粋関数）、時点のある値は constants.js に置く
 // ===========================
 (function () {
   'use strict';
 
   // --- ブラウザへの保存（README「ツールを追加するとき」12） ---
-  // キーは必ず "__REPO___" で始める。全ツールが同じオリジンで localStorage を共有しているため
-  var KEY_PREFIX = '__REPO___';
+  // キーは必ず "ai-log_" で始める。全ツールが同じオリジンで localStorage を共有しているため
+  var KEY_PREFIX = 'ai-log_';
   var store = {
     get: function (name, fallback) {
       try {
@@ -77,7 +77,7 @@
 
   // --- ファイルへの書き出し・読み込み（youheioonuki.github.io の README「ツールを追加するとき」20。決定 D31） ---
   // data は store に保存しているものと同じ形。中身はこの端末の中で作り、どこにも送信しない
-  var TOOL = '__REPO__';
+  var TOOL = 'ai-log';
   document.getElementById('backup-export').addEventListener('click', function () {
     var blob = new Blob([JSON.stringify(window.Calc.buildBackup(TOOL, { draft: current() }), null, 2)], { type: 'application/json' });
     var a = document.createElement('a');
@@ -109,10 +109,8 @@
   el.unit.addEventListener('change', update);
   update();
 
-  // PWA-BEGIN（オフライン対応にしないツールでは、init.mjs がこのブロックを消す）
   // 登録は './sw.js' だけ。scope: '/' を指定しない（README「ツールを追加するとき」13）
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     addEventListener('load', function () { navigator.serviceWorker.register('./sw.js').catch(function () {}); });
   }
-  // PWA-END
 })();

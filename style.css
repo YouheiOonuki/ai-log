@@ -1,5 +1,5 @@
 /* ===========================
-   __TITLE__ — yorozu-craft 共通の和紙風の配色
+   AI 会話ログ Markdown 変換 — yorozu-craft 共通の和紙風の配色
    色はトークン（--bg / --card / --text / --muted / --accent / --border）だけを使う。
    ダークモードは端末の設定に自動で合わせる（prefers-color-scheme。手動切替は付けない）
    =========================== */

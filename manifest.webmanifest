@@ -1,8 +1,8 @@
 {
-  "id": "/__REPO__/",
-  "name": "__TITLE__｜yorozu-craft",
-  "short_name": "__TITLE__",
-  "description": "__DESCRIPTION__",
+  "id": "/ai-log/",
+  "name": "AI 会話ログ Markdown 変換｜yorozu-craft",
+  "short_name": "AI 会話ログ Markdown 変換",
+  "description": "ChatGPT・Claude の書き出しを、会話ごとの Markdown に。",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",

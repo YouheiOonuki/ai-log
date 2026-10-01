@@ -7,7 +7,7 @@ const CONSTANTS = require('../constants.js');
 const fs = require('node:fs');
 const path = require('node:path');
 
-// テンプレートのまま（tools/init.mjs がまだある）なら、確認日は "__DATE__" のままでよい
+// テンプレートのまま（tools/init.mjs がまだある）なら、確認日は "2026-10-01" のままでよい
 const IS_TEMPLATE = fs.existsSync(path.join(__dirname, '..', 'tools', 'init.mjs'));
 
 test('roundUp: 100 円単位で切り上げ', () => {
@@ -22,7 +22,7 @@ test('roundUp: 数でないものは NaN', () => {
 test('constants: すべての値に出典と確認日がある', () => {
   for (const [key, c] of Object.entries(CONSTANTS)) {
     assert.ok(c.source && c.url && c.checked, `${key} に source / url / checked が無い`);
-    if (IS_TEMPLATE && c.checked === '__DATE__') continue;
+    if (IS_TEMPLATE && c.checked === '2026-10-01') continue;
     assert.match(c.checked, /^\d{4}-\d{2}-\d{2}$/, `${key} の checked は YYYY-MM-DD`);
   }
 });

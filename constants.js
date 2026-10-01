@@ -13,7 +13,7 @@
       label: '例の料率',
       source: '出典の名前（公式ページ）',
       url: 'https://example.go.jp/',
-      checked: '__DATE__',   // この日に出典を見て確かめた
+      checked: '2026-10-01',   // この日に出典を見て確かめた
     },
   };
 
