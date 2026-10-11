@@ -319,3 +319,9 @@ details > summary:focus-visible { outline: 2px solid var(--accent); outline-offs
 .conv-list .conv { display: block; width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.4rem 0 0.1rem; }
 .conv-list .conv-meta { display: block; font-size: 0.78rem; color: var(--muted); padding-bottom: 0.3rem; }
 .md-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.8rem; line-height: 1.5; max-height: 24rem; overflow-y: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; }
+
+/* この道具について（結果の後ろの折りたたみ。使い方ページの要約。AdSense 審査 2026-10-04） */
+details.card.opt.about-tool > summary { white-space: normal; }   /* 長い summary を折り返す */
+details.about-tool h3 { font-size: 0.95rem; margin: 0.9rem 0 0.3rem; }
+details.about-tool p, details.about-tool li { font-size: 0.9rem; line-height: 1.75; }
+details.about-tool ul { padding-left: 1.2rem; margin: 0.3rem 0 0.5rem; }
