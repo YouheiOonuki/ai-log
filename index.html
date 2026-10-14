@@ -69,7 +69,7 @@
         <div class="btn-row">
           <button type="button" class="btn" id="pick">zip か json を選ぶ</button>
         </div>
-        <p class="hint">ChatGPT・Claude の書き出しの .zip（中の conversations.json でも可）。両方まとめて選べます。</p>
+        <label class="hint" for="file">ChatGPT・Claude の書き出しの .zip（中の conversations.json でも可）。両方まとめて選べます。</label>
         <p class="small"><button type="button" class="linkbtn" id="try-sample">見本（架空の会話）で試す</button></p>
       </div>
       <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
@@ -80,7 +80,7 @@
       <h2 id="h-result">結果</h2>
       <div id="result-main" aria-live="polite">
         <p class="result-big" id="result">—</p>
-        <p class="result-sub" id="result-sub">ファイルを選ぶと、会話の数が出ます。</p>
+        <p class="result-sub" id="result-sub"></p>
       </div>
       <div class="btn-row no-print" id="dl-row" hidden>
         <button type="button" class="btn" id="dl-zip">Markdown（zip）をダウンロード</button>
@@ -139,7 +139,8 @@
       </details>
     </div>
 
-    <p class="small">ファイルも設定も保存しません。読み込みはこの端末の中だけで、ページを閉じると消えます。</p>
+    <!-- data-keep: 入れたファイルの扱い（保存しない・端末の外に出ない）。A2 の「入力は端末の外に出ない」と同じ役目 -->
+    <p class="small" data-keep>ファイルも設定も保存しません。読み込みはこの端末の中だけで、ページを閉じると消えます。</p>
     <!-- about-tool: 道具の説明（使い方ページの要約。AdSense 審査 2026-10-04）。日本語のページだけ（id を付けない: 日英で同じ id を持つ試験があるため） -->
     <details class="about-tool card opt no-print">
       <summary>この道具について（使い方・しくみ・注意）</summary>
