@@ -146,14 +146,9 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0; }   /* ボタンの間隔（SCREEN.md 5 章） */
 
 @media print {
-  .fixbar, .no-print { display: none !important; }
+  .no-print { display: none !important; }
   /* 印刷では折りたたみの中も出す（途中の計算・入れた値を紙に残す） */
   main details::details-content { content-visibility: visible; display: block; }
-  main details > summary::before { content: none; }
-  .layout-2col { display: block; }
-  .layout-2col .result-card { position: static; max-height: none; overflow: visible; }
-  /* 広告は印刷に出さない（gakushu-print と同じ） */
-  ins.adsbygoogle, .google-auto-placed, iframe[id^="aswift"], iframe[id^="google_ads"] { display: none !important; }
 }
 
 /* ===========================
