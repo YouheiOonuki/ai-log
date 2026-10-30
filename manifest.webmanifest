@@ -1,6 +1,6 @@
 {
   "id": "/ai-log/",
-  "name": "AI 会話ログ Markdown 変換｜yorozu-craft",
+  "name": "AI 会話ログ Markdown 変換",
   "short_name": "AI 会話ログ Markdown 変換",
   "description": "ChatGPT・Claude の書き出しを、会話ごとの Markdown に。",
   "lang": "ja",
