@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- 吹き出し 2 つ（会話）と、下に Markdown の # 。和紙風の配色 -->
-  <rect x="6" y="6" width="52" height="52" rx="10" fill="#faf6ee" stroke="#8b4513" stroke-width="4"/>
-  <path d="M14 14h22a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H22l-6 5v-5h-2a4 4 0 0 1-4-4v-8a4 4 0 0 1 4-4z" fill="#8b4513"/>
-  <path d="M30 34h20a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-2v5l-6-5H30a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4z" fill="none" stroke="#8b4513" stroke-width="3"/>
-  <path d="M36 38l-1.5 8M42 38l-1.5 8M32.5 40.5h11M32 44h11" stroke="#8b4513" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <rect x="6" y="6" width="52" height="52" rx="10" fill="#eef0f2" stroke="#0e5a6b" stroke-width="4"/>
+  <path d="M14 14h22a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H22l-6 5v-5h-2a4 4 0 0 1-4-4v-8a4 4 0 0 1 4-4z" fill="#0e5a6b"/>
+  <path d="M30 34h20a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-2v5l-6-5H30a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4z" fill="none" stroke="#0e5a6b" stroke-width="3"/>
+  <path d="M36 38l-1.5 8M42 38l-1.5 8M32.5 40.5h11M32 44h11" stroke="#0e5a6b" stroke-width="2" fill="none" stroke-linecap="round"/>
 </svg>
