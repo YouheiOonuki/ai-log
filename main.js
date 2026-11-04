@@ -97,6 +97,7 @@
     var ds = state.list.map(function (s) { return s.date; }).filter(Boolean).sort();
     if (ds.length) { el.from.min = el.to.min = ds[0]; el.from.max = el.to.max = ds[ds.length - 1]; }
     refresh();
+    window.yzUsed?.();
   }
 
   function refresh() {
