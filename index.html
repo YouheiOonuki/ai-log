@@ -87,6 +87,10 @@
         <button type="button" class="btn btn-primary" id="dl-zip">Markdown（zip）をダウンロード</button>
         <button type="button" class="btn" id="dl-one">1 つの Markdown にまとめる</button>
       </div>
+      <!-- 年 × 月の升目（main.js が描く。升を押すと期間の絞り込みにその月が入る。Q-381） -->
+      <div class="mgrid" id="mgrid" hidden>
+        <table id="mgrid-table" aria-labelledby="h-result"></table>
+      </div>
       <details class="rels" id="detail" hidden>
         <summary>一覧と注意（題名を押すと中身の見本）</summary>
         <ul class="notes" id="notes"></ul>

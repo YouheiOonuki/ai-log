@@ -214,6 +214,66 @@ test('matches: 期間（作成日・タイムゾーン）、題名の言葉（�
   assert.ok(!C.matches({ ...c, created: null }, { from: '2020-01-01' }, TZ));
 });
 
+test('monthCounts: 見本の会話は 2026 年の 1 月と 2 月に 1 件ずつ', () => {
+  for (const lang of ['ja', 'en']) {
+    const st = C.newStats();
+    const convs = C.makeSample(lang).flatMap((f) => JSON.parse(f.text).map((x) => C.normalize(x, st)));
+    const g = C.monthCounts(convs, TZ);
+    assert.deepEqual(g.years, [{ year: 2026, months: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }], lang);
+    assert.equal(g.max, 1);
+  }
+});
+
+test('monthCounts: 年をまたぐ（古い年が上、間の年は 0 の行）・月の終わりの 23:59 と次の月の 0:00', () => {
+  const at = (s) => ({ created: new Date(s) });
+  const g = C.monthCounts([
+    at('2026-04-15T12:00:00Z'), at('2024-12-31T23:59:59Z'), at('2026-03-31T23:59:00Z'), at('2026-04-01T00:00:00Z'),
+  ], 'UTC');
+  assert.deepEqual(g.years.map((y) => y.year), [2024, 2025, 2026]);
+  assert.equal(g.years[0].months[11], 1);
+  assert.deepEqual(g.years[1].months, Array(12).fill(0));
+  assert.deepEqual(g.years[2].months.slice(2, 4), [1, 2]);
+  assert.equal(g.max, 2);
+  // epoch ミリ秒でも、前もって出した date でも同じ
+  assert.equal(C.monthCounts([{ created: Date.UTC(2026, 3, 1) }], 'UTC').years[0].months[3], 1);
+  assert.equal(C.monthCounts([{ created: new Date(0), date: '2026-05-02' }], 'UTC').years[0].months[4], 1);
+});
+
+test('monthCounts: タイムゾーンで月が変わる（端末の時刻で数える）', () => {
+  const c = [{ created: new Date('2026-01-31T16:00:00Z') }];   // 東京では 2 月 1 日 1:00
+  assert.equal(C.monthCounts(c, 'UTC').years[0].months[0], 1);
+  assert.equal(C.monthCounts(c, 'Asia/Tokyo').years[0].months[0], 0);
+  assert.equal(C.monthCounts(c, 'Asia/Tokyo').years[0].months[1], 1);
+  const ny = [{ created: new Date('2026-03-01T03:00:00Z') }];   // New York では 2 月 28 日
+  assert.equal(C.monthCounts(ny, 'America/New_York').years[0].months[1], 1);
+});
+
+test('monthCounts: 0 件・作った日の無い会話は数えない', () => {
+  assert.deepEqual(C.monthCounts([], TZ), { years: [], max: 0 });
+  assert.deepEqual(C.monthCounts(null, TZ), { years: [], max: 0 });
+  assert.deepEqual(C.monthCounts([{ created: null }, { created: undefined }], TZ), { years: [], max: 0 });
+  const g = C.monthCounts([{ created: null }, { created: new Date('2026-06-10T00:00:00Z') }], 'UTC');
+  assert.equal(g.years[0].months.reduce((a, b) => a + b, 0), 1);
+});
+
+test('monthLevel: 0 件は 0、ほかは最多の月に対して 1〜4', () => {
+  assert.equal(C.monthLevel(0, 10), 0);
+  assert.equal(C.monthLevel(0, 0), 0);
+  assert.deepEqual([1, 2, 3, 5, 6, 8, 10].map((n) => C.monthLevel(n, 10)), [1, 1, 2, 2, 3, 4, 4]);
+  assert.equal(C.monthLevel(1, 1), 4);
+});
+
+test('monthRange: 月の初めと終わり（閏年の 2 月・12 月）。その期間の絞り込みの件数 ＝ 升の数', () => {
+  assert.deepEqual(C.monthRange(2024, 2), { from: '2024-02-01', to: '2024-02-29' });
+  assert.deepEqual(C.monthRange(2026, 2), { from: '2026-02-01', to: '2026-02-28' });
+  assert.deepEqual(C.monthRange(2026, 4), { from: '2026-04-01', to: '2026-04-30' });
+  assert.deepEqual(C.monthRange(2026, 12), { from: '2026-12-01', to: '2026-12-31' });
+  const list = ['2026-03-31T23:59:00Z', '2026-04-01T00:00:00Z', '2026-04-30T23:59:59Z', '2026-05-01T00:00:00Z'].map((s) => ({ source: 'claude', title: 'x', created: new Date(s) }));
+  const n = C.monthCounts(list, 'UTC').years[0].months[3];
+  assert.equal(n, 2);
+  assert.equal(list.filter((c) => C.matches(c, C.monthRange(2026, 4), 'UTC')).length, n);
+});
+
 test('isConversationsFile: conversations.json と分かれた conversations-000.json だけ', () => {
   for (const ok of ['conversations.json', 'export/conversations.json', 'conversations-000.json', 'a\\conversations-12.json']) assert.ok(C.isConversationsFile(ok), ok);
   for (const no of ['shared_conversations.json', 'user.json', 'conversations.json.bak', 'my-conversations.json']) assert.ok(!C.isConversationsFile(no), no);
