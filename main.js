@@ -12,12 +12,12 @@
   function $(id) { return document.getElementById(id); }
   var el = {
     result: $('result'), sub: $('result-sub'), dlRow: $('dl-row'), detail: $('detail'), notes: $('notes'), list: $('list'),
-    preview: $('preview'), previewPath: $('preview-path'), mgrid: $('mgrid'), mgridTable: $('mgrid-table'),
+    preview: $('preview'), previewPath: $('preview-path'), mgrid: $('mgrid'), mgridTable: $('mgrid-table'), wgrid: $('wgrid'), wgridTable: $('wgrid-table'),
     q: $('q'), from: $('from'), to: $('to'), source: $('source'), style: $('style'), folder: $('folder'), bySource: $('by-source'),
   };
   var TZ = 'UTC';
   try { TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { /* 古いブラウザ */ }
-  var state = { list: [], errors: [], stats: null, shown: [], busy: false };
+  var state = { list: [], errors: [], stats: null, shown: [], busy: false, wh: null };   // wh: 曜日 × 時刻の表で押した升 { dow, hour }
   var LIST_MAX = 100;   // 一覧に出す件数（多いときは絞り込みで探す）
 
   // --- 本体（Web Worker）。作れないとき（file:// で開いたときなど）は画面の中で同じものを動かす ---
@@ -72,9 +72,10 @@
     state.list = m.list.map(function (s) {
       s.created = s.created != null ? new Date(s.created) : null;
       s.date = s.created ? C.localDate(s.created, TZ) : null;
+      if (s.created) { var w = C.weekHour(s.created, TZ); s.dow = w.dow; s.hour = w.hour; }   // 曜日 × 時刻の表（描き直しのたびに出し直さない）
       return s;
     });
-    state.errors = m.errors; state.stats = m.stats;
+    state.errors = m.errors; state.stats = m.stats; state.wh = null;
     el.detail.hidden = false;
     // 注意（時刻・重なり・枝・添付・知らない形・読めなかった所）
     el.notes.innerHTML = '';
@@ -101,7 +102,7 @@
   }
 
   function refresh() {
-    var f = filter();
+    var f = filter(); f.wh = state.wh;
     state.shown = state.list.filter(function (s) { return C.matches(s, f, TZ); });
     syncSummary();
     var total = state.list.length, n = state.shown.length;
@@ -134,6 +135,7 @@
     });
     if (sorted.length > LIST_MAX) li(el.list, T.more(fmt(sorted.length - LIST_MAX))).className = 'small';
     renderGrid();
+    renderWeekGrid();
   }
 
   // --- 年 × 月の升目（数は calc.js の monthCounts）。升を押すと期間の欄にその月の初めと終わりが入り、もう一度押すと外れる ---
@@ -145,7 +147,7 @@
     return r.from === f && r.to === t ? f.slice(0, 7) : null;
   }
   function renderGrid() {
-    var f = filter(); f.from = f.to = null;   // 出どころと題名だけ掛ける（押した月のほかの月が消えないように）
+    var f = filter(); f.from = f.to = null; f.wh = state.wh;   // 期間のほかを掛ける（押した月のほかの月が消えないように）
     var g = C.monthCounts(state.list.filter(function (s) { return C.matches(s, f, TZ); }), TZ), pick = pickedMonth();
     var tb = el.mgridTable;
     tb.innerHTML = '';
@@ -179,6 +181,46 @@
     else { var r = C.monthRange(+key.slice(0, 4), +key.slice(5, 7)); el.from.value = r.from; el.to.value = r.to; }
     refresh();
     var again = el.mgridTable.querySelector('button[data-month="' + key + '"]');
+    if (again) again.focus();
+  });
+
+  // --- 曜日 × 時刻の表（数は calc.js の weekHourCounts。行は月曜〜日曜、列は 0〜23 時）。升を押すとその曜日・その時刻だけに絞り、もう一度押すと外す ---
+  var DOW = [0, 1, 2, 3, 4, 5, 6].map(function (i) {   // 曜日の短い名前（2024-01-01 は月曜）
+    return new Intl.DateTimeFormat(T.locale, { weekday: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, 1 + i)));
+  });
+  function renderWeekGrid() {
+    var f = filter(), pick = state.wh;   // 押した升のほかの絞り込みを掛ける（押した升のほかの升が消えないように）
+    var shown = state.list.filter(function (s) { return C.matches(s, f, TZ); });
+    var g = C.weekHourCounts(shown, TZ), tb = el.wgridTable;
+    tb.innerHTML = '';
+    el.wgrid.hidden = !g.max && !pick;
+    if (el.wgrid.hidden) return;
+    var head = tb.createTHead().insertRow();
+    head.appendChild(document.createElement('td'));
+    for (var h = 0; h < 24; h++) { var th = document.createElement('th'); th.scope = 'col'; th.textContent = String(h); head.appendChild(th); }
+    var body = tb.createTBody();
+    g.rows.forEach(function (row, d) {
+      var tr = body.insertRow(), th = document.createElement('th');
+      th.scope = 'row'; th.textContent = DOW[d]; tr.appendChild(th);
+      row.forEach(function (n, hr) {
+        var td = tr.insertCell(), on = !!pick && pick.dow === d && pick.hour === hr;
+        if (!n && !on) return;   // 0 件の升は押せない（空の升）
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'lv' + C.monthLevel(n, g.max);
+        b.setAttribute('aria-label', fmt(n));
+        b.setAttribute('aria-pressed', String(on));
+        b.dataset.dow = d; b.dataset.hour = hr;
+        td.appendChild(b);
+      });
+    });
+  }
+  el.wgridTable.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-dow]');
+    if (!b) return;
+    var d = +b.dataset.dow, hr = +b.dataset.hour;
+    state.wh = state.wh && state.wh.dow === d && state.wh.hour === hr ? null : { dow: d, hour: hr };
+    refresh();
+    var again = el.wgridTable.querySelector('button[data-dow="' + d + '"][data-hour="' + hr + '"]');
     if (again) again.focus();
   });
 
