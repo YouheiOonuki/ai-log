@@ -256,6 +256,73 @@ test('monthCounts: 0 件・作った日の無い会話は数えない', () => {
   assert.equal(g.years[0].months.reduce((a, b) => a + b, 0), 1);
 });
 
+test('weekHourCounts: 升の数の合計 ＝ 作った日時の在る会話の数（試料と、日時の無い会話を混ぜたもの）', () => {
+  const st = C.newStats();
+  const convs = ['synthetic/chatgpt-conversations.json', 'synthetic/claude-conversations.json', 'ai-chat-md-export/chatgpt-conversations.json', 'ai-chat-md-export/claude-conversations.json']
+    .flatMap((f) => JSON.parse(read(f)).map((x) => C.normalize(x, st)))
+    .concat([{ created: null }, { created: undefined }]);
+  for (const tz of ['UTC', 'Asia/Tokyo', 'America/New_York']) {
+    const g = C.weekHourCounts(convs, tz);
+    assert.equal(g.rows.length, 7);
+    assert.ok(g.rows.every((r) => r.length === 24));
+    assert.equal(g.rows.flat().reduce((a, b) => a + b, 0), convs.filter((c) => c.created).length, tz);
+    assert.equal(g.max, Math.max(...g.rows.flat()));
+  }
+  assert.deepEqual(C.weekHourCounts([], TZ).max, 0);
+  assert.deepEqual(C.weekHourCounts(null, TZ).rows.flat(), Array(168).fill(0));
+});
+
+test('weekHour: 週の始まりは月曜（0）、日曜は 6。23 時と 0 時・日曜と月曜の境', () => {
+  const w = (s, tz) => C.weekHour(new Date(s), tz);
+  assert.deepEqual(w('2026-01-04T23:59:59Z', 'UTC'), { dow: 6, hour: 23 });   // 2026-01-04 は日曜
+  assert.deepEqual(w('2026-01-05T00:00:00Z', 'UTC'), { dow: 0, hour: 0 });
+  assert.deepEqual(w('2026-01-10T12:00:00Z', 'UTC'), { dow: 5, hour: 12 });   // 土曜
+});
+
+test('weekHour: タイムゾーンで曜日と時刻が変わる（端末の時刻で数える）', () => {
+  const w = (s, tz) => C.weekHour(new Date(s), tz);
+  assert.deepEqual(w('2026-01-04T15:00:00Z', 'UTC'), { dow: 6, hour: 15 });
+  assert.deepEqual(w('2026-01-04T15:00:00Z', 'Asia/Tokyo'), { dow: 0, hour: 0 });   // 東京では月曜 0 時
+  assert.deepEqual(w('2026-01-04T14:59:59Z', 'Asia/Tokyo'), { dow: 6, hour: 23 });
+  assert.deepEqual(w('2026-01-05T03:00:00Z', 'America/New_York'), { dow: 6, hour: 22 });   // New York では日曜 22 時
+});
+
+test('weekHourCounts: 夏時間の在る時間帯（New York。2026-03-08 に 2 時が無く、2026-11-01 に 1 時が 2 回）', () => {
+  const ny = 'America/New_York';
+  const at = (s) => ({ created: new Date(s) });
+  const spring = C.weekHourCounts([at('2026-03-08T06:30:00Z'), at('2026-03-08T07:30:00Z')], ny);   // 1:30 EST と 3:30 EDT（日曜）
+  assert.equal(spring.rows[6][1], 1);
+  assert.equal(spring.rows[6][2], 0);
+  assert.equal(spring.rows[6][3], 1);
+  const fall = C.weekHourCounts([at('2026-11-01T05:30:00Z'), at('2026-11-01T06:30:00Z')], ny);   // 1:30 EDT と 1:30 EST（日曜）
+  assert.equal(fall.rows[6][1], 2);
+  assert.equal(fall.max, 2);
+});
+
+test('weekHourCounts: 前もって出した dow・hour があればそれを使う、epoch ミリ秒でも数える', () => {
+  assert.equal(C.weekHourCounts([{ created: new Date(0), dow: 2, hour: 7 }], 'UTC').rows[2][7], 1);
+  assert.equal(C.weekHourCounts([{ created: Date.UTC(2026, 0, 5, 9) }], 'UTC').rows[0][9], 1);
+});
+
+test('matches: 月の升と曜日 × 時刻の升を両方押した一覧 ＝ 両方に合う会話', () => {
+  const at = (s) => ({ title: 'x', source: 'claude', created: new Date(s) });
+  const list = [
+    at('2026-01-05T09:10:00Z'),   // 1 月・月曜 9 時 … 両方に合う
+    at('2026-01-12T09:59:00Z'),   // 1 月・月曜 9 時 … 両方に合う
+    at('2026-01-05T10:00:00Z'),   // 1 月・月曜 10 時
+    at('2026-02-02T09:00:00Z'),   // 2 月・月曜 9 時
+    at('2026-01-06T09:00:00Z'),   // 1 月・火曜 9 時
+    { title: 'x', source: 'claude', created: null },
+  ];
+  const f = { from: '2026-01-01', to: '2026-01-31', wh: { dow: 0, hour: 9 } };
+  const got = list.filter((c) => C.matches(c, f, 'UTC'));
+  const want = list.filter((c) => c.created && C.matches(c, { from: f.from, to: f.to }, 'UTC') && C.matches(c, { wh: f.wh }, 'UTC'));
+  assert.deepEqual(got, want);
+  assert.equal(got.length, 2);
+  assert.equal(list.filter((c) => C.matches(c, { wh: f.wh }, 'UTC')).length, 3);
+  assert.equal(list.filter((c) => C.matches(c, { wh: f.wh }, 'Asia/Tokyo')).length, 0);   // 東京では月曜 18 時
+});
+
 test('monthLevel: 0 件は 0、ほかは最多の月に対して 1〜4', () => {
   assert.equal(C.monthLevel(0, 10), 0);
   assert.equal(C.monthLevel(0, 0), 0);

@@ -10,7 +10,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'ai-log-';
-const CACHE_NAME   = `${CACHE_PREFIX}v1`; // キャッシュする中身の構成を変えたら上げる（英語のページ・Web Worker も入れてある）
+const CACHE_NAME   = `${CACHE_PREFIX}v2`; // キャッシュする中身の構成を変えたら上げる（英語のページ・Web Worker も入れてある）
 
 /** 初回インストール時に取得しておくファイル */
 const PRECACHE_URLS = [

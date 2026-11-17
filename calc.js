@@ -484,6 +484,11 @@
       if (f.from && d < f.from) return false;
       if (f.to && d > f.to) return false;
     }
+    if (f.wh) {   // 曜日 × 時刻の升（Q-427）。{ dow: 0〜6（月曜が 0）, hour: 0〜23 }
+      if (!conv.created) return false;
+      var w = conv.dow != null ? conv : weekHour(conv.created instanceof Date ? conv.created : new Date(conv.created), tz);
+      if (w.dow !== f.wh.dow || w.hour !== f.wh.hour) return false;
+    }
     var terms = fold(f.q).split(/\s+/).filter(Boolean);
     if (terms.length) {
       var t = fold(conv.title);
@@ -523,6 +528,32 @@
   function monthRange(y, m) {
     var last = new Date(Date.UTC(y, m, 0)).getUTCDate(), p = String(y) + '-' + (m < 10 ? '0' : '') + m + '-';
     return { from: p + '01', to: p + (last < 10 ? '0' : '') + last };
+  }
+
+  // =====================================================================
+  // 曜日 × 時刻の表（画面の表。Q-427）。曜日と時刻は端末のタイムゾーン（年 × 月の表と同じ決まり）。週の始まりは月曜
+  // =====================================================================
+  /** その時点の曜日（月曜 0 〜 日曜 6）と時（0〜23） */
+  function weekHour(date, tz) {
+    var p = partsIn(date, tz);
+    return { dow: (new Date(Date.UTC(+p.y, +p.mo - 1, +p.d)).getUTCDay() + 6) % 7, hour: +p.h };
+  }
+  /**
+   * 曜日・時刻ごとの、始めた会話の数。作った日時の無い会話は数えない
+   * @param {object[]} list 会話の要約（created: Date か epoch ミリ秒。dow・hour: 前もって出した値があればそれを使う）
+   * @param {string} tz IANA のタイムゾーン
+   * @returns {{rows: number[][], max: number}} rows は月曜〜日曜の 7 行、各 0〜23 時の 24 個
+   */
+  function weekHourCounts(list, tz) {
+    var rows = [], max = 0, d, h;
+    for (d = 0; d < 7; d++) { rows.push([]); for (h = 0; h < 24; h++) rows[d].push(0); }
+    (list || []).forEach(function (c) {
+      if (c.created == null) return;
+      var w = c.dow != null ? c : weekHour(c.created instanceof Date ? c.created : new Date(c.created), tz);
+      var n = ++rows[w.dow][w.hour];
+      if (n > max) max = n;
+    });
+    return { rows: rows, max: max };
   }
 
   /** 書き出しの中の、会話が入っているファイルか（ChatGPT は conversations-000.json のように分かれることがある） */
@@ -572,7 +603,7 @@
     ArraySplitter: ArraySplitter, lineOfError: lineOfError, detect: detect, normalize: normalize, newStats: newStats,
     fromChatGPT: fromChatGPT, fromClaude: fromClaude, fence: fence,
     LABELS: LABELS, toMarkdown: toMarkdown, toCombinedMarkdown: toCombinedMarkdown,
-    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, monthCounts: monthCounts, monthLevel: monthLevel, monthRange: monthRange, isConversationsFile: isConversationsFile, makeSample: makeSample,
+    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, monthCounts: monthCounts, monthLevel: monthLevel, monthRange: monthRange, weekHour: weekHour, weekHourCounts: weekHourCounts, isConversationsFile: isConversationsFile, makeSample: makeSample,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Calc = api;
