@@ -492,6 +492,39 @@
     return true;
   }
 
+  // =====================================================================
+  // 年 × 月の升目（画面の表。Q-381）。月の境は端末のタイムゾーン（frontmatter の created と同じ決まり）
+  // =====================================================================
+  /**
+   * 作った月ごとの会話の数。作った日の無い会話は数えない。年は古い順で、間の年も 0 の行で入れる
+   * @param {object[]} list 会話の要約（created: Date か epoch ミリ秒。date: 前もって出した "YYYY-MM-DD" があればそれを使う）
+   * @param {string} tz IANA のタイムゾーン
+   * @returns {{years: Array<{year:number, months:number[]}>, max:number}} months は 1〜12 月の 12 個
+   */
+  function monthCounts(list, tz) {
+    var at = {}, lo = Infinity, hi = -Infinity, max = 0;
+    (list || []).forEach(function (c) {
+      if (c.created == null) return;
+      var d = c.date || localDate(c.created instanceof Date ? c.created : new Date(c.created), tz);
+      var y = +d.slice(0, 4), m = +d.slice(5, 7);
+      if (!at[y]) at[y] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      at[y][m - 1]++;
+      if (at[y][m - 1] > max) max = at[y][m - 1];
+      if (y < lo) lo = y;
+      if (y > hi) hi = y;
+    });
+    var years = [];
+    for (var y = lo; y <= hi; y++) years.push({ year: y, months: at[y] || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] });
+    return { years: years, max: max };
+  }
+  /** 升の地の濃さ: 0 件は 0、ほかは最多の月に対する割合で 1〜4 */
+  function monthLevel(n, max) { return n > 0 && max > 0 ? Math.min(4, Math.ceil(n * 4 / max)) : 0; }
+  /** その月の初めの日と終わりの日（期間の絞り込みの欄に入れる "YYYY-MM-DD"） */
+  function monthRange(y, m) {
+    var last = new Date(Date.UTC(y, m, 0)).getUTCDate(), p = String(y) + '-' + (m < 10 ? '0' : '') + m + '-';
+    return { from: p + '01', to: p + (last < 10 ? '0' : '') + last };
+  }
+
   /** 書き出しの中の、会話が入っているファイルか（ChatGPT は conversations-000.json のように分かれることがある） */
   function isConversationsFile(path) { return /(^|\/)conversations(-\d+)?\.json$/i.test(String(path).replace(/\\/g, '/')); }
 
@@ -539,7 +572,7 @@
     ArraySplitter: ArraySplitter, lineOfError: lineOfError, detect: detect, normalize: normalize, newStats: newStats,
     fromChatGPT: fromChatGPT, fromClaude: fromClaude, fence: fence,
     LABELS: LABELS, toMarkdown: toMarkdown, toCombinedMarkdown: toCombinedMarkdown,
-    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, isConversationsFile: isConversationsFile, makeSample: makeSample,
+    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, monthCounts: monthCounts, monthLevel: monthLevel, monthRange: monthRange, isConversationsFile: isConversationsFile, makeSample: makeSample,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Calc = api;

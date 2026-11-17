@@ -12,7 +12,7 @@
   function $(id) { return document.getElementById(id); }
   var el = {
     result: $('result'), sub: $('result-sub'), dlRow: $('dl-row'), detail: $('detail'), notes: $('notes'), list: $('list'),
-    preview: $('preview'), previewPath: $('preview-path'),
+    preview: $('preview'), previewPath: $('preview-path'), mgrid: $('mgrid'), mgridTable: $('mgrid-table'),
     q: $('q'), from: $('from'), to: $('to'), source: $('source'), style: $('style'), folder: $('folder'), bySource: $('by-source'),
   };
   var TZ = 'UTC';
@@ -133,7 +133,54 @@
       x.appendChild(b); x.appendChild(meta); el.list.appendChild(x);
     });
     if (sorted.length > LIST_MAX) li(el.list, T.more(fmt(sorted.length - LIST_MAX))).className = 'small';
+    renderGrid();
   }
+
+  // --- 年 × 月の升目（数は calc.js の monthCounts）。升を押すと期間の欄にその月の初めと終わりが入り、もう一度押すと外れる ---
+  /** 期間の欄がちょうど 1 か月なら "YYYY-MM"、ほかは null */
+  function pickedMonth() {
+    var f = el.from.value, t = el.to.value;
+    if (!f || !t) return null;
+    var r = C.monthRange(+f.slice(0, 4), +f.slice(5, 7));
+    return r.from === f && r.to === t ? f.slice(0, 7) : null;
+  }
+  function renderGrid() {
+    var f = filter(); f.from = f.to = null;   // 出どころと題名だけ掛ける（押した月のほかの月が消えないように）
+    var g = C.monthCounts(state.list.filter(function (s) { return C.matches(s, f, TZ); }), TZ), pick = pickedMonth();
+    var tb = el.mgridTable;
+    tb.innerHTML = '';
+    el.mgrid.hidden = !g.years.length;
+    if (!g.years.length) return;
+    var head = tb.createTHead().insertRow();
+    head.appendChild(document.createElement('td'));
+    for (var m = 1; m <= 12; m++) { var th = document.createElement('th'); th.scope = 'col'; th.textContent = String(m); head.appendChild(th); }
+    var body = tb.createTBody();
+    g.years.forEach(function (yr) {
+      var tr = body.insertRow(), th = document.createElement('th');
+      th.scope = 'row'; th.textContent = String(yr.year); tr.appendChild(th);
+      yr.months.forEach(function (n, i) {
+        var td = tr.insertCell(), key = yr.year + '-' + String(i + 1).padStart(2, '0');
+        if (!n && key !== pick) return;   // 0 件の月は空の升
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'lv' + C.monthLevel(n, g.max);
+        b.textContent = n ? fmt(n) : '';
+        if (!n) b.setAttribute('aria-label', '0');
+        b.setAttribute('aria-pressed', String(key === pick));
+        b.dataset.month = key;
+        td.appendChild(b);
+      });
+    });
+  }
+  el.mgridTable.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-month]');
+    if (!b) return;
+    var key = b.dataset.month;
+    if (pickedMonth() === key) { el.from.value = ''; el.to.value = ''; }
+    else { var r = C.monthRange(+key.slice(0, 4), +key.slice(5, 7)); el.from.value = r.from; el.to.value = r.to; }
+    refresh();
+    var again = el.mgridTable.querySelector('button[data-month="' + key + '"]');
+    if (again) again.focus();
+  });
 
   function showPreview(m) {
     text(el.previewPath, T.previewOf(m.path));

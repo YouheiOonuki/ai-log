@@ -172,6 +172,22 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 .conv-list li { border-bottom: 1px solid var(--border); padding: var(--sp-1) 0; }
 .conv-list .conv { display: block; width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; padding: var(--sp-2) 0 var(--sp-1); }
 .conv-list .conv-meta { display: block; font-size: var(--fs-s); color: var(--muted); padding-bottom: var(--sp-2); }
+/* 年 × 月の升目（Q-381）。地の濃さは 4 段（升の中に数があるので色だけにならない）。押した月は太い枠。390 幅で入らなければ表の中だけ横に動く */
+:root { --mg-ink3: var(--text); }
+@media (prefers-color-scheme: dark) { :root { --mg-ink3: var(--on-accent); } }
+.mgrid { overflow-x: auto; margin: var(--sp-3) 0; }
+.mgrid table { border-collapse: collapse; font-size: var(--fs-s); font-variant-numeric: tabular-nums; }
+.mgrid th { font-weight: 400; color: var(--muted); padding: 0 var(--sp-1); text-align: center; }
+.mgrid tbody th { text-align: right; padding-right: var(--sp-2); }
+.mgrid td { padding: 1px; }
+.mgrid td button { display: block; width: 100%; min-width: 2rem; min-height: var(--tap); padding: 0 2px; border: 1px solid var(--border); border-radius: 3px; background: var(--card); color: var(--text); font-weight: 700; cursor: pointer; }
+.mgrid tbody td:empty::before { content: ""; display: block; min-width: 2rem; min-height: var(--tap); border: 1px solid var(--border); border-radius: 3px; opacity: 0.5; }
+.mgrid .lv1 { background: color-mix(in srgb, var(--accent) 15%, var(--card)); }
+.mgrid .lv2 { background: color-mix(in srgb, var(--accent) 35%, var(--card)); }
+.mgrid .lv3 { background: color-mix(in srgb, var(--accent) 62%, var(--card)); color: var(--mg-ink3); }
+.mgrid .lv4 { background: var(--accent); color: var(--on-accent); }
+.mgrid button[aria-pressed="true"] { border: 3px solid var(--text); box-shadow: inset 0 0 0 2px var(--card); text-decoration: underline; text-underline-offset: 3px; }
+@media (forced-colors: active) { .mgrid td button { border-color: CanvasText; } .mgrid button[aria-pressed="true"] { border-width: 4px; } }
 .md-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--fs-s); line-height: 1.5; max-height: 24rem; overflow-y: auto; background: var(--bg-2); border-radius: var(--radius); padding: var(--sp-3); }
 
 /* この道具について（結果の後ろの折りたたみ。使い方ページの要約。AdSense 審査 2026-10-04） */
