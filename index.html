@@ -89,11 +89,13 @@
       </div>
       <!-- 年 × 月の升目（main.js が描く。升を押すと期間の絞り込みにその月が入る。Q-381） -->
       <div class="mgrid" id="mgrid" hidden>
-        <table id="mgrid-table" aria-labelledby="h-result"></table>
+        <p class="grid-name" id="mgrid-name">年 × 月</p>
+        <table id="mgrid-table" aria-labelledby="mgrid-name"></table>
       </div>
       <!-- 曜日 × 時刻の表（main.js が描く。升を押すとその曜日・その時刻の会話だけに絞る。Q-427） -->
       <div class="mgrid wgrid" id="wgrid" hidden>
-        <table id="wgrid-table" aria-labelledby="h-result"></table>
+        <p class="grid-name" id="wgrid-name">曜日 × 時刻</p>
+        <table id="wgrid-table" aria-labelledby="wgrid-name"></table>
       </div>
       <details class="rels" id="detail" hidden>
         <summary>一覧と注意（題名を押すと中身の見本）</summary>
