@@ -182,8 +182,8 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 .mgrid th { font-weight: 400; color: var(--muted); padding: 0 var(--sp-1); text-align: center; }
 .mgrid tbody th { text-align: right; padding-right: var(--sp-2); }
 .mgrid td { padding: 1px; }
-.mgrid td button { display: block; width: 100%; min-width: 2rem; min-height: var(--tap); padding: 0 2px; border: 1px solid var(--border); border-radius: 3px; background: var(--card); color: var(--text); font-weight: 700; cursor: pointer; }
-.mgrid tbody td:empty::before { content: ""; display: block; min-width: 2rem; min-height: var(--tap); border: 1px solid var(--border); border-radius: 3px; opacity: 0.5; }
+.mgrid td button { display: block; width: 100%; min-width: var(--tap); min-height: var(--tap); padding: 0 2px; border: 1px solid var(--border); border-radius: 3px; background: var(--card); color: var(--text); font-weight: 700; cursor: pointer; }
+.mgrid tbody td:empty::before { content: ""; display: block; min-width: var(--tap); min-height: var(--tap); border: 1px solid var(--border); border-radius: 3px; opacity: 0.5; }
 .mgrid .lv1 { background: color-mix(in srgb, var(--accent) 15%, var(--card)); }
 .mgrid .lv2 { background: color-mix(in srgb, var(--accent) 35%, var(--card)); }
 .mgrid .lv3 { background: color-mix(in srgb, var(--accent) 62%, var(--card)); color: var(--mg-ink3); }
