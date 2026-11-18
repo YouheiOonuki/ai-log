@@ -97,6 +97,16 @@
         <p class="grid-name" id="wgrid-name">曜日 × 時刻</p>
         <table id="wgrid-table" aria-labelledby="wgrid-name"></table>
       </div>
+      <!-- 1 日ごとの升目（main.js が描く。升を押すとその日の会話だけに絞る。升は小さいので、押す所は升目の下の前の日・次の日。Q-455） -->
+      <div class="dgrid" id="dgrid" hidden>
+        <p class="grid-name" id="dgrid-name">1 日ごと</p>
+        <svg id="dgrid-svg" tabindex="0" role="group" aria-labelledby="dgrid-name" aria-describedby="dgrid-day"></svg>
+        <div class="dgrid-day">
+          <button type="button" class="btn" id="dgrid-prev" aria-label="前の日">‹</button>
+          <p id="dgrid-day" aria-live="polite"></p>
+          <button type="button" class="btn" id="dgrid-next" aria-label="次の日">›</button>
+        </div>
+      </div>
       <details class="rels" id="detail" hidden>
         <summary>一覧と注意（題名を押すと中身の見本）</summary>
         <ul class="notes" id="notes"></ul>

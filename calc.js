@@ -489,6 +489,10 @@
       var w = conv.dow != null ? conv : weekHour(conv.created instanceof Date ? conv.created : new Date(conv.created), tz);
       if (w.dow !== f.wh.dow || w.hour !== f.wh.hour) return false;
     }
+    if (f.day) {   // 1 日ごとの升目で押した日（Q-455）。"YYYY-MM-DD"（端末のタイムゾーンの日付）
+      if (!conv.created) return false;
+      if ((conv.date || localDate(conv.created instanceof Date ? conv.created : new Date(conv.created), tz)) !== f.day) return false;
+    }
     var terms = fold(f.q).split(/\s+/).filter(Boolean);
     if (terms.length) {
       var t = fold(conv.title);
@@ -556,6 +560,52 @@
     return { rows: rows, max: max };
   }
 
+  // =====================================================================
+  // 1 日ごとの升目（画面の図。Q-455）。年ごとに 1 段、横が週・縦が曜日（月曜が上。曜日 × 時刻の表と同じ週の始まり）。
+  // 日付は端末のタイムゾーン。日付の足し引きは "YYYY-MM-DD" の暦の上で行う（夏時間で 1 日が 23・25 時間でも 1 日ずつ動く）
+  // =====================================================================
+  function ymd(t) { return new Date(t).toISOString().slice(0, 10); }
+  function utcOf(s) { return Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)); }
+  /** その年の日数（365 か 366） */
+  function daysInYear(y) { return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 366 : 365; }
+  /** その年の 1 月 1 日の曜日（月曜 0 〜 日曜 6） */
+  function jan1(y) { return (new Date(Date.UTC(y, 0, 1)).getUTCDay() + 6) % 7; }
+  /** その年の週の列の数（53。うるう年で 1 月 1 日が日曜の年だけ 54） */
+  function weekCols(y) { return Math.floor((daysInYear(y) - 1 + jan1(y)) / 7) + 1; }
+  /** "YYYY-MM-DD" に n 日足した日 */
+  function addDays(s, n) { return ymd(utcOf(s) + n * 86400000); }
+  /** "YYYY-MM-DD" の升の位置: 年・その年の何日目（0 から）・列（週）・行（曜日、月曜 0） */
+  function dayCell(s) {
+    var y = +s.slice(0, 4), doy = Math.round((utcOf(s) - Date.UTC(y, 0, 1)) / 86400000), k = doy + jan1(y);
+    return { year: y, doy: doy, col: Math.floor(k / 7), row: k % 7 };
+  }
+  /** 年の中の列・行の升の日（その年に無い升〈1 月 1 日の前・12 月 31 日の後〉は、同じ年のいちばん近い日） */
+  function dayAt(y, col, row) {
+    var doy = Math.max(0, Math.min(daysInYear(y) - 1, col * 7 + row - jan1(y)));
+    return ymd(Date.UTC(y, 0, 1) + doy * 86400000);
+  }
+  /**
+   * 日ごとの、始めた会話の数。作った日時の無い会話は数えない。年は古い順で、間の年も 0 の段で入れる
+   * @param {object[]} list 会話の要約（created: Date か epoch ミリ秒。date: 前もって出した "YYYY-MM-DD" があればそれを使う）
+   * @param {string} tz IANA のタイムゾーン
+   * @returns {{years: Array<{year:number, days:number[]}>, max:number}} days はその年の 1 月 1 日からの 365 か 366 個
+   */
+  function dayCounts(list, tz) {
+    var at = {}, lo = Infinity, hi = -Infinity, max = 0;
+    (list || []).forEach(function (c) {
+      if (c.created == null) return;
+      var p = dayCell(c.date || localDate(c.created instanceof Date ? c.created : new Date(c.created), tz));
+      if (!at[p.year]) at[p.year] = new Array(daysInYear(p.year)).fill(0);
+      var n = ++at[p.year][p.doy];
+      if (n > max) max = n;
+      if (p.year < lo) lo = p.year;
+      if (p.year > hi) hi = p.year;
+    });
+    var years = [];
+    for (var y = lo; y <= hi; y++) years.push({ year: y, days: at[y] || new Array(daysInYear(y)).fill(0) });
+    return { years: years, max: max };
+  }
+
   /** 書き出しの中の、会話が入っているファイルか（ChatGPT は conversations-000.json のように分かれることがある） */
   function isConversationsFile(path) { return /(^|\/)conversations(-\d+)?\.json$/i.test(String(path).replace(/\\/g, '/')); }
 
@@ -603,7 +653,8 @@
     ArraySplitter: ArraySplitter, lineOfError: lineOfError, detect: detect, normalize: normalize, newStats: newStats,
     fromChatGPT: fromChatGPT, fromClaude: fromClaude, fence: fence,
     LABELS: LABELS, toMarkdown: toMarkdown, toCombinedMarkdown: toCombinedMarkdown,
-    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, monthCounts: monthCounts, monthLevel: monthLevel, monthRange: monthRange, weekHour: weekHour, weekHourCounts: weekHourCounts, isConversationsFile: isConversationsFile, makeSample: makeSample,
+    safeName: safeName, utf8Len: utf8Len, filePaths: filePaths, matches: matches, monthCounts: monthCounts, monthLevel: monthLevel, monthRange: monthRange, weekHour: weekHour, weekHourCounts: weekHourCounts,
+    daysInYear: daysInYear, jan1: jan1, weekCols: weekCols, addDays: addDays, dayCell: dayCell, dayAt: dayAt, dayCounts: dayCounts, isConversationsFile: isConversationsFile, makeSample: makeSample,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Calc = api;

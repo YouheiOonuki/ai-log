@@ -92,6 +92,15 @@
         <p class="grid-name" id="wgrid-name">Weekday × hour</p>
         <table id="wgrid-table" aria-labelledby="wgrid-name"></table>
       </div>
+      <div class="dgrid" id="dgrid" hidden>
+        <p class="grid-name" id="dgrid-name">Day by day</p>
+        <svg id="dgrid-svg" tabindex="0" role="group" aria-labelledby="dgrid-name" aria-describedby="dgrid-day"></svg>
+        <div class="dgrid-day">
+          <button type="button" class="btn" id="dgrid-prev" aria-label="Previous day">‹</button>
+          <p id="dgrid-day" aria-live="polite"></p>
+          <button type="button" class="btn" id="dgrid-next" aria-label="Next day">›</button>
+        </div>
+      </div>
       <details class="rels" id="detail" hidden>
         <summary>List and notes (tap a title to preview)</summary>
         <ul class="notes" id="notes"></ul>

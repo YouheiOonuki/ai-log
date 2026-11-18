@@ -323,6 +323,118 @@ test('matches: 月の升と曜日 × 時刻の升を両方押した一覧 ＝ �
   assert.equal(list.filter((c) => C.matches(c, { wh: f.wh }, 'Asia/Tokyo')).length, 0);   // 東京では月曜 18 時
 });
 
+/** 1 万件・5 年分の試料（2021〜2025 年。200 件に 1 件は作った日時が無い → 50 件）。乱数は固定の式 */
+function tenThousand() {
+  const out = [], t0 = Date.UTC(2021, 0, 1), span = Date.UTC(2026, 0, 1) - t0;
+  let s = 12345;
+  const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for (let i = 0; i < 10000; i++) out.push({ title: 't' + (i % 7), source: i % 3 ? 'claude' : 'chatgpt', created: i % 200 === 199 ? null : new Date(t0 + Math.floor(rnd() * span)) });
+  return out;
+}
+
+test('dayCounts: 升の合計 ＝ 作った日時の在る会話の数（1 万件の試料で 9,950。fixtures と日時の無い会話を混ぜたもの）', () => {
+  const big = tenThousand();
+  for (const tz of ['UTC', 'Asia/Tokyo', 'America/New_York']) {
+    const g = C.dayCounts(big, tz);
+    assert.equal(g.years.reduce((a, y) => a + y.days.reduce((b, n) => b + n, 0), 0), 9950, tz);
+    assert.equal(g.max, Math.max(...g.years.flatMap((y) => y.days)));
+    assert.ok(g.years.every((y) => y.days.length === C.daysInYear(y.year)));
+  }
+  const g = C.dayCounts(big, 'UTC');
+  assert.deepEqual(g.years.map((y) => y.year), [2021, 2022, 2023, 2024, 2025]);
+  const st = C.newStats();
+  const convs = ['synthetic/chatgpt-conversations.json', 'synthetic/claude-conversations.json', 'ai-chat-md-export/chatgpt-conversations.json', 'ai-chat-md-export/claude-conversations.json']
+    .flatMap((f) => JSON.parse(read(f)).map((x) => C.normalize(x, st)))
+    .concat([{ created: null }, { created: undefined }]);
+  const h = C.dayCounts(convs, TZ);
+  assert.equal(h.years.reduce((a, y) => a + y.days.reduce((b, n) => b + n, 0), 0), convs.filter((c) => c.created).length);
+  assert.deepEqual(C.dayCounts([], TZ), { years: [], max: 0 });
+  assert.deepEqual(C.dayCounts(null, TZ).years, []);
+});
+
+test('dayCounts: 間の年は 0 の段で入る、前もって出した date があればそれを使う', () => {
+  const g = C.dayCounts([{ created: new Date(0), date: '2022-03-04' }, { created: Date.UTC(2024, 0, 1) }], 'UTC');
+  assert.deepEqual(g.years.map((y) => y.year), [2022, 2023, 2024]);
+  assert.equal(g.years[0].days[C.dayCell('2022-03-04').doy], 1);
+  assert.ok(g.years[1].days.every((n) => n === 0));
+  assert.equal(g.years[2].days[0], 1);
+});
+
+test('dayCell・addDays: 年をまたぐ週（12 月 31 日は前の年の段の最後の列、1 月 1 日は次の年の段の最初の列）', () => {
+  // 2025-12-31 は水曜、2026-01-01 は木曜
+  assert.deepEqual(C.dayCell('2025-12-31'), { year: 2025, doy: 364, col: 52, row: 2 });
+  assert.deepEqual(C.dayCell('2026-01-01'), { year: 2026, doy: 0, col: 0, row: 3 });
+  assert.deepEqual(C.dayCell('2026-01-05'), { year: 2026, doy: 4, col: 1, row: 0 });   // 次の月曜は次の列の上
+  assert.equal(C.addDays('2025-12-31', 1), '2026-01-01');
+  assert.equal(C.addDays('2026-01-01', -1), '2025-12-31');
+  assert.equal(C.addDays('2025-12-29', 7), '2026-01-05');
+  assert.equal(C.dayAt(2026, 0, 0), '2026-01-01');     // 1 月 1 日より前の升は、その年の 1 月 1 日
+  assert.equal(C.dayAt(2026, 52, 6), '2026-12-31');    // 12 月 31 日（木曜）より後の升は、その年の 12 月 31 日
+  assert.equal(C.dayAt(2026, 1, 0), '2026-01-05');
+});
+
+test('dayCell・addDays・weekCols: うるう年（2 月 29 日・12 月 31 日が 366 日目、1 月 1 日が日曜のうるう年だけ 54 列）', () => {
+  assert.equal(C.daysInYear(2024), 366);
+  assert.equal(C.daysInYear(2025), 365);
+  assert.equal(C.daysInYear(2000), 366);
+  assert.equal(C.daysInYear(2100), 365);
+  assert.equal(C.dayCell('2024-02-29').doy, 59);
+  assert.equal(C.dayCell('2024-12-31').doy, 365);
+  assert.equal(C.addDays('2024-02-28', 1), '2024-02-29');
+  assert.equal(C.addDays('2023-02-28', 1), '2023-03-01');
+  assert.equal(C.weekCols(2026), 53);
+  assert.equal(C.weekCols(2024), 53);
+  assert.equal(C.weekCols(2012), 54);   // 2012-01-01 は日曜
+  assert.equal(C.dayCounts([{ created: Date.UTC(2024, 1, 29, 12) }], 'UTC').years[0].days[59], 1);
+});
+
+test('dayCounts・addDays: 夏時間の日（New York。2026-03-08 は 23 時間、2026-11-01 は 25 時間）も 1 日として数え、1 日ずつ動く', () => {
+  const ny = 'America/New_York', at = (s) => ({ created: new Date(s) });
+  const g = C.dayCounts([at('2026-03-08T05:30:00Z'), at('2026-03-08T07:30:00Z'), at('2026-03-09T03:59:00Z'), at('2026-03-09T04:00:00Z')], ny);
+  const doy = C.dayCell('2026-03-08').doy;
+  assert.equal(g.years[0].days[doy], 3);       // 00:30 EST・03:30 EDT・23:59 EDT は 3 月 8 日
+  assert.equal(g.years[0].days[doy + 1], 1);   // 00:00 EDT は 3 月 9 日
+  const f = C.dayCounts([at('2026-11-01T04:30:00Z'), at('2026-11-01T05:30:00Z'), at('2026-11-01T06:30:00Z'), at('2026-11-02T04:59:00Z')], ny);
+  assert.equal(f.years[0].days[C.dayCell('2026-11-01').doy], 4);   // 00:30 EDT・1:30 EDT・1:30 EST・23:59 EST
+  assert.equal(C.addDays('2026-03-07', 1), '2026-03-08');
+  assert.equal(C.addDays('2026-03-08', 1), '2026-03-09');
+  assert.equal(C.addDays('2026-11-01', 1), '2026-11-02');
+  assert.equal(C.addDays('2026-11-02', -1), '2026-11-01');
+});
+
+test('matches: 日・月・曜日 × 時刻の 3 つの絞り込みを掛けた一覧 ＝ 手で数えた数（1 万件の試料、3 通り）', () => {
+  const big = tenThousand();
+  // 手で数える: calc.js を使わず、UTC の Date の値だけで
+  const pad = (n) => String(n).padStart(2, '0');
+  const dayOf = (d) => d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
+  const hand = (day, from, to, wh) => big.filter((c) => {
+    if (!c.created) return false;
+    const s = dayOf(c.created);
+    return (!day || s === day) && (!from || (s >= from && s <= to)) && (!wh || ((c.created.getUTCDay() + 6) % 7 === wh.dow && c.created.getUTCHours() === wh.hour));
+  }).length;
+  const busiest = Object.entries(big.reduce((a, c) => { if (c.created) { const s = dayOf(c.created); a[s] = (a[s] || 0) + 1; } return a; }, {})).sort((a, b) => b[1] - a[1])[0][0];
+  const wd = new Date(busiest + 'T00:00:00Z'), whOfBusiest = { dow: (wd.getUTCDay() + 6) % 7, hour: big.find((c) => c.created && dayOf(c.created) === busiest).created.getUTCHours() };
+  const cases = [
+    { day: busiest, from: busiest.slice(0, 8) + '01', to: C.monthRange(+busiest.slice(0, 4), +busiest.slice(5, 7)).to, wh: null },   // 日と、その日の月
+    { day: busiest, from: busiest.slice(0, 8) + '01', to: C.monthRange(+busiest.slice(0, 4), +busiest.slice(5, 7)).to, wh: whOfBusiest },   // 3 つとも合う
+    { day: busiest, from: '2021-01-01', to: '2021-01-31', wh: whOfBusiest },   // 日と月が食い違う（0 件、ただし日が 2021 年 1 月なら 1 件以上）
+  ];
+  const got = cases.map((k) => big.filter((c) => C.matches(c, { day: k.day, from: k.from, to: k.to, wh: k.wh }, 'UTC')).length);
+  assert.deepEqual(got, cases.map((k) => hand(k.day, k.from, k.to, k.wh)));
+  assert.ok(got[0] >= got[1] && got[1] >= 1);
+  assert.equal(big.filter((c) => C.matches(c, { day: busiest }, 'UTC')).length, hand(busiest));
+  assert.equal(big.filter((c) => C.matches(c, { day: '2030-01-01' }, 'UTC')).length, 0);
+});
+
+test('matches: 日の絞り込みは端末のタイムゾーンの日付で、作った日時の無い会話は外れる', () => {
+  const c = { title: 'x', source: 'claude', created: new Date('2026-01-04T15:30:00Z') };
+  assert.ok(C.matches(c, { day: '2026-01-04' }, 'UTC'));
+  assert.ok(C.matches(c, { day: '2026-01-05' }, 'Asia/Tokyo'));
+  assert.ok(!C.matches(c, { day: '2026-01-04' }, 'Asia/Tokyo'));
+  assert.ok(!C.matches({ title: 'x', source: 'claude', created: null }, { day: '2026-01-04' }, 'UTC'));
+  assert.ok(C.matches({ title: 'x', source: 'claude', created: new Date(0), date: '2026-02-02' }, { day: '2026-02-02' }, 'UTC'));   // 前もって出した date を使う
+});
+
 test('monthLevel: 0 件は 0、ほかは最多の月に対して 1〜4', () => {
   assert.equal(C.monthLevel(0, 10), 0);
   assert.equal(C.monthLevel(0, 0), 0);
