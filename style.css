@@ -194,6 +194,25 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 .grid-name { margin: 0 0 var(--sp-1); font-size: var(--fs-s); font-weight: 700; }
 /* 幅 1,100 px 以上では曜日 × 時刻の表の箱だけを本文の幅の外へ広げ、表の中の横の動きを 0 に（升の大きさは変えない）。1,099 px 以下は表の中で横に動く（ROADMAP 7.240） */
 @media (min-width: 1100px) { .wgrid { width: max-content; max-width: calc(100vw - 2 * var(--sp-4)); position: relative; left: 50%; transform: translateX(-50%); padding: var(--sp-2); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); } }
+/* 1 日ごとの升目（Q-455）。升の大きさは main.js が箱の幅から決める（390 幅で 5 px 刻み）。濃さは年 × 月の表と同じ 4 段、0 件の日は地の色。
+   升そのものは押す所の大きさにしない: フォーカスは升目に 1 つ、押す所は下の行の前の日・次の日（44 px） */
+.dgrid { margin: var(--sp-3) 0; }
+.dgrid svg { display: block; touch-action: manipulation; cursor: pointer; }
+.dgrid svg:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.dgrid text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.dgrid .d0 { fill: var(--bg-2); }
+.dgrid .d1 { fill: color-mix(in srgb, var(--accent) 15%, var(--card)); }
+.dgrid .d2 { fill: color-mix(in srgb, var(--accent) 35%, var(--card)); }
+.dgrid .d3 { fill: color-mix(in srgb, var(--accent) 62%, var(--card)); }
+.dgrid .d4 { fill: var(--accent); }
+.dgrid .cur, .dgrid .pick { fill: none; stroke: var(--text); }
+.dgrid .cur { stroke-width: 1.5; }
+.dgrid .pick { stroke-width: 3; }
+.dgrid-day { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); }
+.dgrid-day .btn { min-width: var(--tap); padding: 0; font-size: var(--fs-l); }
+.dgrid-day p { flex: 1; text-align: center; font-size: var(--fs-s); font-variant-numeric: tabular-nums; }
+.dgrid-day p.on { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+@media (forced-colors: active) { .dgrid .d0 { fill: Canvas; } .dgrid .d1, .dgrid .d2 { fill: GrayText; } .dgrid .d3, .dgrid .d4 { fill: CanvasText; } .dgrid .cur, .dgrid .pick { stroke: Highlight; } }
 .md-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--fs-s); line-height: 1.5; max-height: 24rem; overflow-y: auto; background: var(--bg-2); border-radius: var(--radius); padding: var(--sp-3); }
 
 /* この道具について（結果の後ろの折りたたみ。使い方ページの要約。AdSense 審査 2026-10-04） */

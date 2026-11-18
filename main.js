@@ -13,11 +13,13 @@
   var el = {
     result: $('result'), sub: $('result-sub'), dlRow: $('dl-row'), detail: $('detail'), notes: $('notes'), list: $('list'),
     preview: $('preview'), previewPath: $('preview-path'), mgrid: $('mgrid'), mgridTable: $('mgrid-table'), wgrid: $('wgrid'), wgridTable: $('wgrid-table'),
+    dgrid: $('dgrid'), dgridSvg: $('dgrid-svg'), dgridDay: $('dgrid-day'), dgridPrev: $('dgrid-prev'), dgridNext: $('dgrid-next'),
     q: $('q'), from: $('from'), to: $('to'), source: $('source'), style: $('style'), folder: $('folder'), bySource: $('by-source'),
   };
   var TZ = 'UTC';
   try { TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { /* 古いブラウザ */ }
-  var state = { list: [], errors: [], stats: null, shown: [], busy: false, wh: null };   // wh: 曜日 × 時刻の表で押した升 { dow, hour }
+  // wh: 曜日 × 時刻の表で押した升 { dow, hour }。day: 1 日ごとの升目で絞り込んだ日、cursor: その升目で選んでいる日（どちらも "YYYY-MM-DD"）、days: 読んだ記録全部の日ごとの数（段の年と濃さの境）
+  var state = { list: [], errors: [], stats: null, shown: [], busy: false, wh: null, day: null, cursor: null, days: null };
   var LIST_MAX = 100;   // 一覧に出す件数（多いときは絞り込みで探す）
 
   // --- 本体（Web Worker）。作れないとき（file:// で開いたときなど）は画面の中で同じものを動かす ---
@@ -75,7 +77,8 @@
       if (s.created) { var w = C.weekHour(s.created, TZ); s.dow = w.dow; s.hour = w.hour; }   // 曜日 × 時刻の表（描き直しのたびに出し直さない）
       return s;
     });
-    state.errors = m.errors; state.stats = m.stats; state.wh = null;
+    state.errors = m.errors; state.stats = m.stats; state.wh = null; state.day = null;
+    state.days = C.dayCounts(state.list, TZ);
     el.detail.hidden = false;
     // 注意（時刻・重なり・枝・添付・知らない形・読めなかった所）
     el.notes.innerHTML = '';
@@ -97,12 +100,13 @@
     // 期間の欄の既定の範囲（入力はしない）
     var ds = state.list.map(function (s) { return s.date; }).filter(Boolean).sort();
     if (ds.length) { el.from.min = el.to.min = ds[0]; el.from.max = el.to.max = ds[ds.length - 1]; }
+    state.cursor = ds.length ? ds[ds.length - 1] : null;   // 1 日ごとの升目は、いちばん新しい会話の日を選んだ形で開く
     refresh();
     window.yzUsed?.();
   }
 
   function refresh() {
-    var f = filter(); f.wh = state.wh;
+    var f = filter(); f.wh = state.wh; f.day = state.day;
     state.shown = state.list.filter(function (s) { return C.matches(s, f, TZ); });
     syncSummary();
     var total = state.list.length, n = state.shown.length;
@@ -136,6 +140,7 @@
     if (sorted.length > LIST_MAX) li(el.list, T.more(fmt(sorted.length - LIST_MAX))).className = 'small';
     renderGrid();
     renderWeekGrid();
+    renderDayGrid();
   }
 
   // --- 年 × 月の升目（数は calc.js の monthCounts）。升を押すと期間の欄にその月の初めと終わりが入り、もう一度押すと外れる ---
@@ -147,7 +152,7 @@
     return r.from === f && r.to === t ? f.slice(0, 7) : null;
   }
   function renderGrid() {
-    var f = filter(); f.from = f.to = null; f.wh = state.wh;   // 期間のほかを掛ける（押した月のほかの月が消えないように）
+    var f = filter(); f.from = f.to = null; f.wh = state.wh; f.day = state.day;   // 期間のほかを掛ける（押した月のほかの月が消えないように）
     var g = C.monthCounts(state.list.filter(function (s) { return C.matches(s, f, TZ); }), TZ), pick = pickedMonth();
     var tb = el.mgridTable;
     tb.innerHTML = '';
@@ -190,6 +195,7 @@
   });
   function renderWeekGrid() {
     var f = filter(), pick = state.wh;   // 押した升のほかの絞り込みを掛ける（押した升のほかの升が消えないように）
+    f.day = state.day;
     var shown = state.list.filter(function (s) { return C.matches(s, f, TZ); });
     var g = C.weekHourCounts(shown, TZ), tb = el.wgridTable;
     tb.innerHTML = '';
@@ -223,6 +229,91 @@
     var again = el.wgridTable.querySelector('button[data-dow="' + d + '"][data-hour="' + hr + '"]');
     if (again) again.focus();
   });
+
+  // --- 1 日ごとの升目（数は calc.js の dayCounts。年ごとに 1 段、横が週・縦が曜日〈月曜が上〉）。升を押すとその日だけに絞り、もう一度押すと外す ---
+  // 升は小さい（390 幅で 5 px 刻み）ので、押す所の大きさの対象にしない。フォーカスは升目に 1 つで、↑ ↓ で 1 日・← → で 1 週、Enter・Space で絞り込み。
+  // 下の行に選んでいる日と数、その左右に前の日・次の日（44 px）。絞り込んでいる間は、選ぶ日を動かすと絞り込みもその日に動く（指で升を押し直さなくてよいように）
+  var DG = { label: 36, top: 16, gap: 6 };   // 段の左の年の幅・上の月の高さ・段と段の間（px）
+  var dgGeom = null;
+  function dgBounds() { var ys = state.days.years; return { first: ys[0].year + '-01-01', last: ys[ys.length - 1].year + '-12-31' }; }
+  function renderDayGrid() {
+    var all = state.days;
+    el.dgrid.hidden = !all || !all.years.length;
+    if (el.dgrid.hidden) { dgGeom = null; return; }
+    var f = filter(); f.wh = state.wh;   // 押した日のほかの絞り込みを掛ける（押した日のほかの日が消えないように）。段の年と濃さの境は読んだ記録全部から
+    var g = C.dayCounts(state.list.filter(function (s) { return C.matches(s, f, TZ); }), TZ), by = {};
+    g.years.forEach(function (y) { by[y.year] = y.days; });
+    var cols = Math.max.apply(null, all.years.map(function (y) { return C.weekCols(y.year); }));
+    var p = Math.max(4, Math.floor((el.dgrid.clientWidth - DG.label) / cols)), sz = p - 1, band = 7 * p + DG.gap;
+    var w = DG.label + cols * p, h = DG.top + all.years.length * band - DG.gap;
+    dgGeom = { p: p, band: band };
+    var y0 = all.years[0].year, out = [];
+    for (var m = 1; m <= 12; m++) out.push('<text x="' + (DG.label + C.dayCell(y0 + '-' + String(m).padStart(2, '0') + '-01').col * p) + '" y="11">' + m + '</text>');
+    all.years.forEach(function (yr, i) {
+      var top = DG.top + i * band, days = by[yr.year], j1 = C.jan1(yr.year);
+      out.push('<text x="' + (DG.label - 6) + '" y="' + (top + 3.5 * p + 4) + '" text-anchor="end">' + yr.year + '</text>');
+      for (var d = 0; d < yr.days.length; d++) {
+        var k = d + j1;
+        out.push('<rect class="d' + C.monthLevel(days ? days[d] : 0, all.max) + '" x="' + (DG.label + Math.floor(k / 7) * p) + '" y="' + (top + (k % 7) * p) + '" width="' + sz + '" height="' + sz + '"/>');
+      }
+    });
+    function ring(s, cls) {
+      var c = C.dayCell(s), i = c.year - y0;
+      return '<rect class="' + cls + '" x="' + (DG.label + c.col * p - 1) + '" y="' + (DG.top + i * band + c.row * p - 1) + '" width="' + (sz + 2) + '" height="' + (sz + 2) + '"/>';
+    }
+    var b = dgBounds();
+    if (state.day && state.day >= b.first && state.day <= b.last) out.push(ring(state.day, 'pick'));
+    if (state.cursor < b.first || state.cursor > b.last) state.cursor = b.last;
+    out.push(ring(state.cursor, 'cur'));
+    var svg = el.dgridSvg;
+    svg.setAttribute('width', w); svg.setAttribute('height', h); svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.innerHTML = out.join('');
+    var cc = C.dayCell(state.cursor), n = by[cc.year] ? by[cc.year][cc.doy] : 0;
+    text(el.dgridDay, state.cursor + ' · ' + T.count(fmt(n)));   // 区切りは一覧の行（出どころ · 発言の数）と同じ
+    el.dgridDay.className = state.day === state.cursor ? 'on' : '';
+    el.dgridPrev.disabled = state.cursor <= b.first;
+    el.dgridNext.disabled = state.cursor >= b.last;
+  }
+  /** 押した所（升目の中の位置）にいちばん近い日 */
+  function dayFromPoint(x, y) {
+    var ys = state.days.years, p = dgGeom.p, i = Math.max(0, Math.min(ys.length - 1, Math.floor((y - DG.top + DG.gap / 2) / dgGeom.band)));
+    var yr = ys[i].year, row = Math.max(0, Math.min(6, Math.floor((y - DG.top - i * dgGeom.band) / p)));
+    var col = Math.max(0, Math.min(C.weekCols(yr) - 1, Math.floor((x - DG.label) / p)));
+    return C.dayAt(yr, col, row);
+  }
+  /** 升目の動きで上の表が伸び縮みしても、触っている所（升目・前の日・次の日）が指の下から動かないように */
+  function keepInPlace(target, fn) {
+    var before = target.getBoundingClientRect().top;
+    fn();
+    var d = target.getBoundingClientRect().top - before;
+    if (d) window.scrollBy(0, d);
+  }
+  function toggleDay(target) {
+    keepInPlace(target, function () { state.day = state.day === state.cursor ? null : state.cursor; refresh(); });
+  }
+  /** 選ぶ日を n 日動かす。升目の外（最初の段の 1 月 1 日より前・最後の段の 12 月 31 日より後）へは動かない */
+  function moveDay(n, target) {
+    var to = C.addDays(state.cursor, n), b = dgBounds();
+    if (to < b.first || to > b.last) return;
+    state.cursor = to;
+    if (state.day) keepInPlace(target, function () { state.day = to; refresh(); });
+    else renderDayGrid();
+  }
+  el.dgridSvg.addEventListener('click', function (e) {
+    if (!dgGeom) return;
+    var r = el.dgridSvg.getBoundingClientRect();
+    state.cursor = dayFromPoint(e.clientX - r.left, e.clientY - r.top);
+    toggleDay(el.dgridSvg);
+  });
+  el.dgridSvg.addEventListener('keydown', function (e) {
+    var step = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 }[e.key];
+    if (step) { e.preventDefault(); moveDay(step, el.dgridSvg); return; }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDay(el.dgridSvg); }
+  });
+  el.dgridPrev.addEventListener('click', function () { moveDay(-1, el.dgridPrev); });
+  el.dgridNext.addEventListener('click', function () { moveDay(1, el.dgridNext); });
+  var dgResize = null;
+  addEventListener('resize', function () { clearTimeout(dgResize); dgResize = setTimeout(function () { if (state.days) renderDayGrid(); }, 100); });
 
   function showPreview(m) {
     text(el.previewPath, T.previewOf(m.path));
