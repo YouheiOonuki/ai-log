@@ -89,7 +89,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* 日英の切り替え（README「ツールを追加するとき」23） */
 .lang-switch { text-align: right; font-size: var(--fs-s); padding: 0 max(var(--sp-4), calc((100% - 680px) / 2 + var(--sp-4))); }
-.lang-switch a { display: inline-flex; align-items: center; min-height: var(--tap); }
+.lang-switch a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); }
 
 /* レイアウト */
 .app-main { max-width: 680px; margin: 0 auto; padding: var(--sp-4); }
@@ -113,6 +113,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .faq dt::before { content: 'Q. '; }
 .faq dd { color: var(--muted); padding: var(--sp-1) 0 var(--sp-2) 1.2rem; border-bottom: 1px solid var(--border); }
 .small { font-size: var(--fs-s); color: var(--muted); margin-top: var(--sp-2); }
+/* 本文の後ろの使い方へのリンク（1 行に 1 つだけ。文中のリンクは含めない） */
+p.small > a[href="./guide.html"] { display: inline-flex; align-items: center; min-height: var(--tap); }
 
 /* フッター */
 .app-footer {
@@ -123,8 +125,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border-top: 1px solid var(--border);
   margin-top: var(--sp-2);
 }
-.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 0 1.1rem; margin-bottom: var(--sp-2); }
-.footer-nav a { display: inline-flex; align-items: center; min-height: var(--tap); color: var(--muted); text-decoration: none; }
+.footer-nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: var(--sp-2) 1.1rem; margin-bottom: var(--sp-2); }
+.footer-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); color: var(--muted); text-decoration: none; }
 .footer-nav a:hover, .footer-nav a[aria-current="page"] { color: var(--accent); }
 
 /* ===========================
