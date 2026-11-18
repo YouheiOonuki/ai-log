@@ -190,6 +190,10 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 @media (forced-colors: active) { .mgrid td button { border-color: CanvasText; } .mgrid button[aria-pressed="true"] { border-width: 4px; } }
 /* 曜日 × 時刻の表（Q-427）。升の作りは年 × 月の表と同じ。数は升の aria-label だけ。表の中を横に動かしても曜日の列は残す */
 .wgrid tbody th { position: sticky; left: 0; z-index: 1; background: var(--card); }
+/* 2 つの表の名前（Q-431）。表のすぐ上の 1 行で、表の aria-labelledby が指す */
+.grid-name { margin: 0 0 var(--sp-1); font-size: var(--fs-s); font-weight: 700; }
+/* 幅 1,100 px 以上では曜日 × 時刻の表の箱だけを本文の幅の外へ広げ、表の中の横の動きを 0 に（升の大きさは変えない）。1,099 px 以下は表の中で横に動く（ROADMAP 7.240） */
+@media (min-width: 1100px) { .wgrid { width: max-content; max-width: calc(100vw - 2 * var(--sp-4)); position: relative; left: 50%; transform: translateX(-50%); padding: var(--sp-2); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); } }
 .md-preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--fs-s); line-height: 1.5; max-height: 24rem; overflow-y: auto; background: var(--bg-2); border-radius: var(--radius); padding: var(--sp-3); }
 
 /* この道具について（結果の後ろの折りたたみ。使い方ページの要約。AdSense 審査 2026-10-04） */
