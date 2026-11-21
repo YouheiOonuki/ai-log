@@ -38,7 +38,7 @@ OpenAI・Anthropic は書き出しの中身の仕様を公開していない（�
 |---|---|---|
 | `tests/fixtures/ai-chat-md-export/chatgpt-conversations.json`・`claude-conversations.json` | 架空の 2 会話ずつ（数学・コード・天気・料理）。そのまま写した | [sugurutakahashi-1234/ai-chat-md-export](https://github.com/sugurutakahashi-1234/ai-chat-md-export) の `examples/chatgpt/conversations.json`・`examples/claude/conversations.json`、コミット `e681a7e8d8658cdba03eb30924b2b71135f710c3`（2025-11-16）。**MIT License**、Copyright (c) 2025 Suguru Takahashi。全文は同じフォルダの `LICENSE` |
 | `tests/fixtures/synthetic/*.json` | 手で作った架空の試料（枝分かれ・システム・考え・コード実行・画像・添付・知らない形・使えない文字の題名・分かれた形・壊れた JSON）。`make.cjs` で作り直せる | このリポジトリ（MIT）。形は次の資料に合わせた（コードもデータも写していない）: [mohamed-chs/convoviz](https://github.com/mohamed-chs/convoviz)（MIT、コミット `6c22e7398bdceb16c34c974512fc460f7bf642c6`、2026-09-13）の `docs/dev/chatgpt-spec.md`・`tests/conftest.py`、[davidteren/claude_desktop_export_browser](https://github.com/davidteren/claude_desktop_export_browser)（README に MIT とあるが LICENSE ファイルは無い。コミット `0191eaa6d8845b42f485f554e6de0f43845e3a3a`、2026-07-12）のテスト、ai-chat-md-export の `schema.ts` |
-| `zip.js` | zip の読み書き | fitbit-export の `zip.js`（同じ作者・MIT）を写し、`readStream`（展開しながら読む）・`bytes`・ZIP64 の目次（65,535 件超）を足した |
+| `zip.js` | zip の読み書き | 同じ作者（MIT）。正本は youheioonuki.github.io の `tools/common/zip.js` で、`tools/sync-common.mjs` が配った写し（fitbit-export と同じ 1 本。手で直さない） |
 
 ## 開いた問い
 
