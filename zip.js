@@ -1,5 +1,5 @@
 // ===========================
-// zip の読み書き（依存なし）。fitbit-export の zip.js（同じ作者・MIT）を写し、readStream を足した
+// zip の読み書き（依存なし）。正本は youheioonuki.github.io の tools/common/zip.js。ai-log・fitbit-export の zip.js は tools/sync-common.mjs が配った写しで、手で直さない（yorozu-plans D685）
 // - 読む: 末尾の中央ディレクトリだけを読み、要る項目だけを File.slice で取り出して
 //   ブラウザの DecompressionStream('deflate-raw') で展開する。2GB を超える zip（ZIP64）も読める。
 //   zip 全体をメモリに載せないので、使わない中身（画像・音声など）は読まない
