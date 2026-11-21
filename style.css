@@ -115,6 +115,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .small { font-size: var(--fs-s); color: var(--muted); margin-top: var(--sp-2); }
 /* 本文の後ろの使い方へのリンク（1 行に 1 つだけ。文中のリンクは含めない） */
 p.small > a[href="./guide.html"] { display: inline-flex; align-items: center; min-height: var(--tap); }
+/* 使い方の出典の一覧（中は guide.html の script が constants.js から入れる）。リポジトリ名のような区切りの無い長い字を、320 幅で折り返す（Q-728: 開いた時に +67 px あふれた） */
+#sources a { overflow-wrap: anywhere; }
 
 /* フッター */
 .app-footer {

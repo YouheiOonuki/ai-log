@@ -157,3 +157,10 @@ test('Markdown の言葉（calc.js の LABELS）: 英語に日本語を残さな
   assert.deepEqual(Object.keys(LABELS.en).sort(), Object.keys(LABELS.ja).sort());
   assert.deepEqual(Object.values(LABELS.en).filter((x) => CJK.test(x)), []);
 });
+
+test('使い方の出典の一覧のリンクは折り返す（Q-728: 320 幅で開くと +67 px あふれた）。規則は共通の枠の外に置く', () => {
+  const css = read('style.css');
+  const own = css.slice(css.indexOf('/* yorozu-common:end */'));
+  assert.match(own, /#sources a\s*\{[^}]*overflow-wrap:\s*anywhere/);
+  for (const f of ['guide.html', 'en/guide.html']) assert.match(read(f), /<details>[\s\S]*?<ul id="sources"><\/ul>[\s\S]*?<\/details>/, f);
+});
