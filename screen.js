@@ -24,10 +24,10 @@
       var show = !!content && !inView;
       if (show && !announced) {
         announced = true;
-        setText(textEl, '');
+        setText(textEl, content);
         bar.hidden = false;
-        // 見えるようにしてから文字を入れると 1 回読まれる。そのあとは読み上げを止める
-        setTimeout(function () { setText(textEl, content); setTimeout(function () { bar.setAttribute('aria-live', 'off'); }, 1000); }, 50);
+        // 字を入れてから見せる（空のボタンを見せない。Q-727）。見えてから同じ字を入れ直すと 1 回読まれる。そのあとは読み上げを止める
+        setTimeout(function () { textEl.textContent = content; setTimeout(function () { bar.setAttribute('aria-live', 'off'); }, 1000); }, 50);
         return;
       }
       setText(textEl, content);
